@@ -1,13 +1,46 @@
 var data = require('../../../data/data.json');
 var dbInstance = require('../../../models');
 
+function allPromisesGenerator(on, columnname, option, concernedEntities) {
+
+	var promises = [];
+
+	function promiseGenerator(columnname, entity, option, addSpecify) {
+		return new Promise((resolve, reject) => {
+
+
+			var optionPromise = {
+				record_id: option.recordId
+			}
+			optionPromise[columnname] = entity;
+			if (option.specify && addSpecify) optionPromise['specify'] = option.specify;
+			on.create(optionPromise)
+				.then(function(res){
+					resolve(res);
+				})
+				.catch(function(err) {
+					reject(err);
+				})
+
+		});
+	}
+
+	concernedEntities.forEach(function(entity, index) {
+
+		promises.push(promiseGenerator(columnname, entity, option, index === concernedEntities.length - 1 ? true : false));
+	})
+
+	return promises;
+
+}
+
 module.exports = {
 
 	import: function(req, res, next) {
 
 		// console.log('data',data[0]);
 
-		var record = data[0];
+		var record = data[3];
 
 		var recordsOptions = {
 			hh_key: record["g1/g1_b/hh_key"],
@@ -26,8 +59,8 @@ module.exports = {
 			distance_to_nearest_road: record['g4/access'],
 			final_recommendations: record['g4/final_recommendation'],
 			submitted_by: record['_submitted_by'],
-			attachment_1: record._attachments && record._attachments.length ? _attachments[0].download_url : null,
-			attachment_2: record._attachments && record._attachments.length ? _attachments[1].download_url : null,
+			attachment_1: record._attachments && record._attachments.length ? record._attachments[0].download_url : null,
+			attachment_2: record._attachments && record._attachments.length ? record._attachments[1].download_url : null,
 			no_subsequent_amount: record["g3/g3_g/no_subsequent_amount"],
 			masons_availability: record["g3/g3_g/mason_available"],
 			describe_household: record["g2/describe_hh"],
@@ -129,9 +162,79 @@ module.exports = {
 
 				.then(function(installmentreponse) {
 					if (installmentreponse && installmentreponse.id) {
-						return true;
+
+						var concernedPriorites = record['g4/top_priorities'].split(' ');
+
+						var priorityOption = {
+							recordId: recordId
+						}
+
+						var generatedPromises = allPromisesGenerator(priorities, 'priority', priorityOption, concernedPriorites);
+
+						return Promise.all(generatedPromises)
+
+
+
 					} else {
 						throw "Error creating installment"
+					}
+				})
+
+				.then(function(prioritiesresponse) {
+
+
+					if (prioritiesresponse) {
+
+
+						var flag = record["g3/g3_b/superstructure_1"] || record["g3/g3_c/superstructure_2"] || record["g3/g3_d/superstructure_3"];
+
+						var concernedSuperstructures = flag.split(' ');
+
+						var structureOption = {
+							recordId: recordId,
+							specify: record["g3/g3_b/superstructure_other_1"] || record["g3/g3_c/superstructure_other_2"] || record["g3/g3_d/superstructure_other_3"]
+						}
+
+						var generatedPromises = allPromisesGenerator(superstructures, 'structure', structureOption, concernedSuperstructures);
+
+						return Promise.all(generatedPromises);
+
+
+
+					} else {
+						throw "Error creating priorities"
+					}
+				})
+
+				.then(function(structuresresponse) {
+					if (structuresresponse) {
+
+						if (record["g3/g3_d/construction_not_started"]) {
+
+							var flag = record["g3/g3_d/construction_not_started"];
+
+							var concerned = flag.split(' ');
+
+
+							var option = {
+								recordId: recordId,
+								specify: record["g3/g3_d/construction_not_started_other"]
+							}
+
+							var generatedPromises = allPromisesGenerator(construction_not_started, 'construction_not_started', option, concerned);
+
+							return Promise.all(generatedPromises);
+
+						} else {
+
+							return true;
+
+						}
+
+
+
+					} else {
+						throw "Error creating structures"
 					}
 				})
 
