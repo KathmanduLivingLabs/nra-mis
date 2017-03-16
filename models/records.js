@@ -121,7 +121,20 @@ module.exports = function(sequelize,DataTypes){
 
 
 
-    });
+    },{
+
+    associate : function () {
+        records.hasMany(house_status,{foreignKey:'record_id'});
+        records.hasMany(construction_not_started,{foreignKey:'record_id'});
+        records.hasMany(grant_received,{foreignKey:'record_id'});
+        records.hasMany(second_installment,{foreignKey:'record_id'});
+        records.hasMany(superstructures,{foreignKey:'record_id'});
+        records.hasMany(priorities,{foreignKey:'record_id'});
+
+
+    }
+
+  });
 
     return Records;
 

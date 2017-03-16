@@ -78,7 +78,13 @@ module.exports = function(sequelize,DataTypes){
 
 
 
-    });
+    },{
+
+    associate : function () {
+        house_status.belongsTo(records,{foreignKey:'record_id'});
+    }
+
+  });
 
     return Housestatus;
 
