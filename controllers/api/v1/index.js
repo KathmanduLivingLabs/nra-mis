@@ -7,6 +7,40 @@ module.exports = (router) => {
 
 	router.post('/api/v1/mis/import', importFn.authorize, importFn.import);
 
+	router.get('/api/v1/mis/region/records', function(req, res) {
+
+		var regionOption = {
+			district: '26'
+		}
+
+		dbInstance.sequelize.query("SELECT count(records.*) as surveys, count(DISTINCT(records.submitted_by))  as surveyors , count(CASE WHEN house_statuses.status = '1' THEN 1 END) as construction_completed ,count(CASE WHEN house_statuses.status = '2' THEN 1 END) as construction_in_progress, count(CASE WHEN house_statuses.status = '3' THEN 1 END) as construction_not_started  FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id WHERE records.district='23'")
+			.then(function(response){
+				console.log(response);
+			})
+
+		// return records.count({
+		// 		where: regionOption,
+		// 		include: [{
+		// 			model: house_status
+		// 		}, {
+		// 			model: construction_not_started
+		// 		}, {
+		// 			model: grant_received
+		// 		}, {
+		// 			model: second_installment
+		// 		}, {
+		// 			model: superstructures
+		// 		}, {
+		// 			model: priorities
+		// 		}]
+		// 	})
+		// 	.then(function(resp) {
+		// 		console.log('RESULT', resp);
+		// 	})
+
+
+	});
+
 	router.get('/api/v1/mis/records', function(req, res) {
 
 		// second_installment.count({

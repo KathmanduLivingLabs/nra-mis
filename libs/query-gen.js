@@ -15,6 +15,16 @@ module.exports = {
 			}
 		}
 		query = query + " FROM  " + queryOptions.table;
+
+		if(queryOptions.where){
+
+			for (var filter in queryOptions.where){
+				
+				
+			}
+
+		}
+
 		return query;
 
 	}
