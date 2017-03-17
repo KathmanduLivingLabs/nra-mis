@@ -14,13 +14,22 @@ module.exports = (router) => {
 			vdc: req.query.vdc
 		}
 
+		var regionStats = {};
+
 		var dbQuery = "SELECT \
 			count(records.*) as surveys, \
 			count(DISTINCT(records.submitted_by))  as surveyors , \
 			count(CASE WHEN house_statuses.status = '1' THEN 1 END) as construction_completed ,\
 			count(CASE WHEN house_statuses.status = '2' THEN 1 END) as construction_in_progress, \
-			count(CASE WHEN house_statuses.status = '3' THEN 1 END) as construction_not_started  \
-			FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id ";
+			count(CASE WHEN house_statuses.status = '3' THEN 1 END) as construction_not_started,  \
+			count(CASE WHEN grant_receiveds.grant_received = '1' THEN 1 END) as grant_received,  \
+			count(CASE WHEN grant_receiveds.grant_received = '2' THEN 1 END) as grant_not_received,  \
+			count(CASE WHEN second_installments.applied_for_second_installment = '1' THEN 1 END) as applied_for_second_installment,  \
+			count(CASE WHEN second_installments.applied_for_second_installment = '2' THEN 1 END) as not_applied_for_second_installment  \
+			FROM records \
+				INNER JOIN house_statuses ON records.id = house_statuses.record_id \
+				INNER JOIN second_installments ON records.id = second_installments.record_id \
+				INNER JOIN grant_receiveds ON records.id = grant_receiveds.record_id ";
 
 		if (regionOption.district) {
 			dbQuery = dbQuery + " WHERE records.district='" + regionOption.district + "' ";
@@ -32,14 +41,63 @@ module.exports = (router) => {
 
 		dbInstance.sequelize.query(dbQuery)
 			.then(function(response) {
+
 				if (response && response.length && response[0].length) {
-					res.json({
-						success: 1,
-						stats: response[0][0]
-					})
+					regionStats = Object.assign(regionStats, response[0][0])
 				}
 
+				if (regionOption.district) {
+
+					var recordsqueryOptions = {
+						column: 'vdc',
+						table: 'records'
+					}
+
+					var queryToRun = queryGen.generateForVdcs(recordsqueryOptions, regionOption);
+
+					if (queryToRun) {
+						return dbInstance.sequelize.query(queryToRun);
+					} else {
+						return true;
+					}
+
+
+
+				} else {
+
+					var recordsqueryOptions = {
+						column: 'district',
+						table: 'records'
+					};
+
+					return dbInstance.sequelize.query(queryGen.generate(recordsqueryOptions));
+
+				}
+
+
+
 			})
+
+		.then(function(inforesponse) {
+
+			if (inforesponse && inforesponse.length && inforesponse[0].length) {
+
+				var vdcStats = inforesponse[0][0];
+
+				regionStats = Object.assign(regionStats, {
+					"regionalStats": vdcStats
+				})
+
+			}
+
+			res.json({
+				success: 1,
+				stats: regionStats
+			})
+
+
+
+		})
 
 		// return records.count({
 		// 		where: regionOption,
