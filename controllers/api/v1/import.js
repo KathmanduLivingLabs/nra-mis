@@ -80,9 +80,14 @@ module.exports = {
 
 		function metaPromiseGenerator(record, index) {
 
+			var attachment1 = record['g3/g3_b/g3_b1/building_photo_1_1'] || record['g3/g3_c/g3_c1/building_photo_2_1'] || record['g3/g3_d/g3_d1/building_photo_3_1'];
+			var attachment2 = record['g3/g3_b/g3_b1/building_photo_1_2'] || record['g3/g3_c/g3_c1/building_photo_2_2'] || record['g3/g3_d/g3_d1/building_photo_3_2'];
+
 
 			var recordsOptions = {
 				hh_key: record["g1/g1_b/hh_key"],
+				ona_record_id : record['_id'],
+				submission_time : record['_submission_time'],
 				district: record['g1/g1_a/district'],
 				vdc: record['g1/g1_b/vdc'],
 				ward: record['g1/g1_b/g1_b1/ward'],
@@ -98,8 +103,8 @@ module.exports = {
 				distance_to_nearest_road: record['g4/access'],
 				final_recommendations: record['g4/final_recommendation'],
 				submitted_by: record['_submitted_by'],
-				attachment_1: record._attachments && record._attachments[0] ? record._attachments[0].download_url : null,
-				attachment_2: record._attachments && record._attachments[1] ? record._attachments[1].download_url : null,
+				attachment_1: attachment1 ,
+				attachment_2: attachment2,
 				no_subsequent_amount: record["g3/g3_g/no_subsequent_amount"],
 				masons_availability: record["g3/g3_g/mason_available"],
 				describe_household: record["g2/describe_hh"],

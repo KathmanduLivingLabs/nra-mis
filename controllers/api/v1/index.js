@@ -4,7 +4,7 @@ var recordsFn = require('./records');
 
 module.exports = (router) => {
 
-	// router.post('/api/v1/mis/import', importFn.authorize, importFn.import);
+	router.post('/api/v1/mis/import', importFn.authorize, importFn.import);
 
 	/**
 	    * @api {get} /api/v1/mis/region/records  Records  

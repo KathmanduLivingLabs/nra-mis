@@ -9,6 +9,16 @@ module.exports = function(sequelize,DataTypes){
             allowNull : true
         },
 
+        ona_record_id : {
+            type : DataTypes.STRING,
+            allowNull : true
+        },
+
+        submission_time : {
+            type : DataTypes.DATE,
+            allowNull : true
+        },
+
         district : {
             type : DataTypes.STRING,
             allowNull : true
