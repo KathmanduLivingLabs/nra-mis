@@ -1,4 +1,5 @@
 var config = require('../config');
+var formatVdc = require('../libs/format-vdc-code');
 
 module.exports = {
 
@@ -35,7 +36,7 @@ module.exports = {
 			var query = "SELECT ";
 
 			codes.forEach(function(code, index) {
-				query = query + "COUNT ( CASE WHEN " + queryOptions.column + " ='" + code + "' THEN 1 END ) AS vdc$" + code;
+				query = query + "COUNT ( CASE WHEN " + queryOptions.column + " ='" + code + "' THEN 1 END ) AS vdc$" + formatVdc.unformat(code);
 				if (index < (codes).length - 1) {
 					query = query + ",";
 				}
