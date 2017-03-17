@@ -124,7 +124,8 @@ module.exports = {
 			return res.json({
 				success: 1,
 				stats: regionStats,
-				percentageStats
+				percentageStats,
+				message : "Stats fetched successfully"
 			})
 
 
