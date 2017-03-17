@@ -107,9 +107,24 @@ module.exports = {
 
 			}
 
+			var percentageStats = {};
+
+			var calculatePercentageFor = ['construction_completed','construction_in_progress','construction_not_started','grant_received','grant_not_received','applied_for_second_installment','not_applied_for_second_installment'];
+
+			calculatePercentageFor.forEach(function(eachstat){
+
+				if(regionStats[eachstat]){
+					percentageStats[eachstat] = (regionStats[eachstat]/regionStats['surveys']) * 100;
+					percentageStats[eachstat] = percentageStats[eachstat] > 0.5 ? Math.round(percentageStats[eachstat]) : Math.round(percentageStats[eachstat] * 100) / 100;
+				}
+
+			});
+
+
 			return res.json({
 				success: 1,
-				stats: regionStats
+				stats: regionStats,
+				percentageStats
 			})
 
 
