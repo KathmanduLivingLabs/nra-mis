@@ -9,7 +9,7 @@ module.exports = {
 		var codes = config.codes[queryOptions.column];
 		var query = "SELECT ";
 		for (var code in codes) {
-			query = query + "COUNT ( CASE WHEN " + queryOptions.column + " ='" + codes[code] + "' THEN 1 END ) AS " + code;
+			query = query + "COUNT ( CASE WHEN " + queryOptions.column + " ='" + codes[code] + "' THEN 1 END ) AS " + code + "$" + codes[code];
 			if (Object.keys(codes).indexOf(code) < Object.keys(codes).length - 1) {
 				query = query + ",";
 			}

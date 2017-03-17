@@ -10,18 +10,35 @@ module.exports = (router) => {
 	router.get('/api/v1/mis/region/records', function(req, res) {
 
 		var regionOption = {
-			district: '26'
+			district: req.query.district,
+			vdc: req.query.vdc
 		}
 
-		dbInstance.sequelize.query("SELECT count(records.*) as surveys, count(DISTINCT(records.submitted_by))  as surveyors , count(CASE WHEN house_statuses.status = '1' THEN 1 END) as construction_completed ,count(CASE WHEN house_statuses.status = '2' THEN 1 END) as construction_in_progress, count(CASE WHEN house_statuses.status = '3' THEN 1 END) as construction_not_started  FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id ")
-			.then(function(response){
-				if(response && response.length && response[0].length){
+		var dbQuery = "SELECT \
+			count(records.*) as surveys, \
+			count(DISTINCT(records.submitted_by))  as surveyors , \
+			count(CASE WHEN house_statuses.status = '1' THEN 1 END) as construction_completed ,\
+			count(CASE WHEN house_statuses.status = '2' THEN 1 END) as construction_in_progress, \
+			count(CASE WHEN house_statuses.status = '3' THEN 1 END) as construction_not_started  \
+			FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id ";
+
+		if (regionOption.district) {
+			dbQuery = dbQuery + " WHERE records.district='" + regionOption.district + "' ";
+
+			if (regionOption.vdc) {
+				dbQuery = dbQuery + " AND  records.vdc='" + regionOption.vdc + "'";
+			}
+		}
+
+		dbInstance.sequelize.query(dbQuery)
+			.then(function(response) {
+				if (response && response.length && response[0].length) {
 					res.json({
-						success : 1,
-						stats : response[0][0]
+						success: 1,
+						stats: response[0][0]
 					})
 				}
-				
+
 			})
 
 		// return records.count({
