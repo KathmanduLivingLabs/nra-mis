@@ -27,7 +27,7 @@ module.exports = {
 		}
 
 		if(req.collects.vdc){
-			
+
 			if(req.collects.vdc === "*"){
 				delete req.collects.vdc;
 			}else{
@@ -123,18 +123,7 @@ module.exports = {
 
 			}
 
-			var percentageStats = {};
 
-			var calculatePercentageFor = ['construction_completed', 'construction_in_progress', 'construction_not_started', 'grant_received', 'grant_not_received', 'applied_for_second_installment', 'not_applied_for_second_installment'];
-
-			calculatePercentageFor.forEach(function(eachstat) {
-
-				if (regionStats[eachstat]) {
-					percentageStats[eachstat] = (regionStats[eachstat] / regionStats['surveys']) * 100;
-					percentageStats[eachstat] = percentageStats[eachstat] > 0.5 ? Math.round(percentageStats[eachstat]) : Math.round(percentageStats[eachstat] * 100) / 100;
-				}
-
-			});
 
 			var vdcStatsCount = 0;
 
@@ -150,7 +139,7 @@ module.exports = {
 
 
 
-			req.percentageStats = percentageStats;
+			
 
 
 			var beneficiariesueryOptions = {
@@ -181,13 +170,16 @@ module.exports = {
 				var beneficiariesStats = responses[0][0];
 			}
 
+			
+
+			
+
 			var apiResponse = {
 				success: 1,
 				stats: req.regionStats,
-				percentageStats: req.percentageStats,
+				// percentageStats: req.percentageStats,
 				message: "Stats fetched successfully"
 			};
-
 
 			if (beneficiariesStats) {
 				apiResponse['beneficiariesStats'] = beneficiariesStats;
@@ -198,6 +190,8 @@ module.exports = {
 				}
 
 				beneficiariesStats['total'] = beneficiariesCount;
+
+				// console.log('HERAMMMM',beneficiariesCount)
 
 
 				var beneficiaryReachPercentage = {};
@@ -218,6 +212,25 @@ module.exports = {
 				apiResponse['beneficiaryReachPercentage'] = beneficiaryReachPercentage;
 
 			}
+
+			var percentageStats = {};
+
+			var calculatePercentageFor = ['construction_completed', 'construction_in_progress', 'construction_not_started', 'grant_received', 'grant_not_received', 'applied_for_second_installment', 'not_applied_for_second_installment'];
+
+			calculatePercentageFor.forEach(function(eachstat) {
+
+				if (regionStats[eachstat] && Number(regionStats['surveys'])) { 
+					percentageStats[eachstat] = (regionStats[eachstat] / beneficiariesStats['total']) * 100;
+					// percentageStats[eachstat] = (regionStats[eachstat] / regionStats['surveys']) * 100;
+				
+					percentageStats[eachstat] = percentageStats[eachstat] > 0.5 ? Math.round(percentageStats[eachstat]) : Math.round(percentageStats[eachstat] * 100) / 100;
+				}else{
+					percentageStats[eachstat] = 0;
+				}
+
+			});
+
+			apiResponse.percentageStats = percentageStats;
 
 			var finalApiResponse = {
 
