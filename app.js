@@ -25,6 +25,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var config = require('./config');
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT ,DELETE');
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,Authorization");
+  next();
+});
+
 var router = express.Router();
 app.use('/',router);
 

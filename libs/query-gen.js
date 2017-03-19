@@ -86,16 +86,18 @@ module.exports = {
 			var query = "SELECT ";
 
 			codes.forEach(function(code, index) {
-				query = query + "COUNT ( CASE WHEN " + queryOptions.row_name + " ='" + parseInt(code.split(regionOption.district)[1]).toString() + "' THEN 1 END ) AS vdc$" + formatVdc.unformat(code);
+
+
+				query = query + "COUNT ( CASE WHEN " + queryOptions.row_name + " ='" + Number(code.slice(regionOption.district.length,code.length)).toString() + "' THEN 1 END ) AS vdc$" + formatVdc.unformat(code);
 				if (index < (codes).length - 1) {
 					query = query + ",";
 				}
 			})
 
-			query = query + " FROM  " + queryOptions.table;
+			query = query + " FROM  " + queryOptions.table +" WHERE district_code='"+regionOption.district+"'" ;
 
 			if (regionOption.vdc) {
-				query = query + " WHERE vdc='" + regionOption.vdc + "'";
+				query = query + " AND vdc_mun_code='" + Number(regionOption.vdc.slice(regionOption.district.length,regionOption.vdc.length)).toString()  + "'";
 
 			}
 

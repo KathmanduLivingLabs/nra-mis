@@ -3,6 +3,7 @@ var dbInstance = require('../../../models');
 var queryGen = require('../../../libs/query-gen');
 
 var sanitize = require('google-caja').sanitize;
+var formatVdc = require('../../../libs/format-vdc-code');
 
 module.exports = {
 
@@ -20,6 +21,21 @@ module.exports = {
 			}
 
 		});
+
+		if(req.collects.district === "*"){
+			delete req.collects.district;
+		}
+
+		if(req.collects.vdc){
+			
+			if(req.collects.vdc === "*"){
+				delete req.collects.vdc;
+			}else{
+				req.collects.vdc = formatVdc.format(req.collects.vdc);
+			}
+		}
+		
+		// console.log('&&&&&&',req.collects)
 
 		return next();
 
@@ -120,7 +136,20 @@ module.exports = {
 
 			});
 
+			var vdcStatsCount = 0;
+
+			for(var vdcStat in vdcStats){
+				vdcStatsCount = vdcStatsCount + Number(vdcStats[vdcStat]);
+			}
+			
+			vdcStats.total = vdcStatsCount;
+
 			req.regionStats = regionStats;
+
+			req.vdcStats = vdcStats;
+
+
+
 			req.percentageStats = percentageStats;
 
 
@@ -136,6 +165,7 @@ module.exports = {
 				return dbInstance.sequelize.query(queryGen.generatorForbeneficiaries(beneficiariesueryOptions));
 
 			} else {
+
 				beneficiariesueryOptions.column = 'vdc';
 				beneficiariesueryOptions.row_name = 'vdc_mun_code';
 				return dbInstance.sequelize.query(queryGen.generatorForbeneficiariesVDC(beneficiariesueryOptions, regionOption));
@@ -158,11 +188,90 @@ module.exports = {
 				message: "Stats fetched successfully"
 			};
 
+
 			if (beneficiariesStats) {
 				apiResponse['beneficiariesStats'] = beneficiariesStats;
+
+				var beneficiariesCount = 0;
+				for(var beneficiary in beneficiariesStats){
+					beneficiariesCount = beneficiariesCount + Number(beneficiariesStats[beneficiary]);
+				}
+
+				beneficiariesStats['total'] = beneficiariesCount;
+
+
+				var beneficiaryReachPercentage = {};
+				// console.log('$$$$$$$$$$',req.beneficiariesStats)
+				for(var eachstat in beneficiariesStats){
+					// console.log('%%%%%%%%%',eachstat,beneficiariesStats[eachstat])
+					if(beneficiariesStats[eachstat] && Number(beneficiariesStats[eachstat])){
+						// console.log('****',req.vdcStats[regionalStat],regionalStat,'!!!!!!',beneficiariesStats[regionalStat])
+						beneficiaryReachPercentage[eachstat] = (Number(req.vdcStats[eachstat])/Number(beneficiariesStats[eachstat])) * 100;
+						// console.log('!~~~~~~~~~~~~~`',beneficiaryReachPercentage[regionalStat])
+						beneficiaryReachPercentage[eachstat] = beneficiaryReachPercentage[eachstat] > 0.5 ? Math.round(beneficiaryReachPercentage[eachstat]) : Math.round(beneficiaryReachPercentage[eachstat] * 100) / 100;
+					}else{
+						beneficiaryReachPercentage[eachstat] = 0;
+					}
+					
+				}
+
+				apiResponse['beneficiaryReachPercentage'] = beneficiaryReachPercentage;
+
 			}
 
-			return res.json(apiResponse);
+			var finalApiResponse = {
+
+				"success" : 1,
+				"stats" : {
+					"survey_status" : {
+						"surveys" : apiResponse.stats.surveys,
+						"surveyors" : apiResponse.stats.surveyors
+					},
+					"construction_status" : {
+						"Completed": apiResponse.stats.construction_completed,
+						"In Progress": apiResponse.stats.construction_in_progress,
+						"Not Started": apiResponse.stats.construction_not_started
+
+					},
+					"grant_status" : {
+						"Received": apiResponse.stats.grant_received,
+						"Not Received": apiResponse.stats.grant_not_received
+
+					},
+					"installment_status" : {
+						"Applied": apiResponse.stats.applied_for_second_installment,
+						"Not Applied": apiResponse.stats.not_applied_for_second_installment
+
+					}
+				},
+				"percentageStats": {
+					"construction_status": {
+						"Completed": apiResponse.percentageStats.construction_completed,
+						"In Progress": apiResponse.percentageStats.construction_in_progress,
+						"Not Started": apiResponse.percentageStats.construction_not_started
+					},
+					"grant_status": {
+						"Received": apiResponse.percentageStats.grant_received,
+						"Not Received": apiResponse.percentageStats.grant_not_received,
+					},
+					"installment_status": {
+						"Applied": apiResponse.percentageStats.applied_for_second_installment,
+						"Not Applied": apiResponse.percentageStats.not_applied_for_second_installment
+					},
+					"regionalStats": apiResponse.beneficiaryReachPercentage
+
+				},
+				"message": "Stats fetched successfully"
+
+
+
+			}
+
+
+
+
+
+			return res.json(finalApiResponse);
 
 		})
 
