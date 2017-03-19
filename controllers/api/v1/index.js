@@ -6,6 +6,8 @@ module.exports = (router) => {
 
 	router.post('/api/v1/mis/import', importFn.authorize, importFn.import);
 
+	router.post('/api/v1/mis/beneficiaries/create', importFn.authorize, importFn.beneficiariesCreate);
+
 	/**
 	    * @api {get} /api/v1/mis/region/records  Records  
 	    * @apiName Records

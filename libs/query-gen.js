@@ -56,6 +56,57 @@ module.exports = {
 		}
 
 
+	},
+
+
+	generatorForbeneficiaries : function(queryOptions){
+
+		var codes = config.codes[queryOptions.column];
+		var query = "SELECT ";
+		for (var code in codes) {
+
+			query = query + "COUNT ( CASE WHEN " + queryOptions.row_name + " ='" + codes[code] + "' THEN 1 END ) AS " + code + "$" + codes[code];
+			if (Object.keys(codes).indexOf(code) < Object.keys(codes).length - 1) {
+				query = query + ",";
+			}
+		}
+		query = query + " FROM  " + queryOptions.table;
+
+
+		return query;
+
+
+	},
+
+	generatorForbeneficiariesVDC : function(queryOptions,regionOption){
+
+		if (regionOption.district && config.codes[queryOptions.column][regionOption.district]) {
+
+			var codes = config.codes[queryOptions.column][regionOption.district].split(' ');
+			var query = "SELECT ";
+
+			codes.forEach(function(code, index) {
+				query = query + "COUNT ( CASE WHEN " + queryOptions.row_name + " ='" + parseInt(code.split(regionOption.district)[1]).toString() + "' THEN 1 END ) AS vdc$" + formatVdc.unformat(code);
+				if (index < (codes).length - 1) {
+					query = query + ",";
+				}
+			})
+
+			query = query + " FROM  " + queryOptions.table;
+
+			if (regionOption.vdc) {
+				query = query + " WHERE vdc='" + regionOption.vdc + "'";
+
+			}
+
+			return query;
+
+		} else {
+			return false;
+		}
+
+
+
 	}
 
 }

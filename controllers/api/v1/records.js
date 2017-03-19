@@ -7,14 +7,14 @@ var sanitize = require('google-caja').sanitize;
 module.exports = {
 
 
-	collect : function(req,res,next){
+	collect: function(req, res, next) {
 
 		req.collects = {};
 
 		var fields = ['district', 'vdc'];
 
 		fields.forEach((field) => {
-			
+
 			if (typeof req.body[field] !== 'undefined' || typeof req.query[field] !== 'undefined') {
 				req.collects[field] = sanitize(req.body[field] || req.query[field]);
 			}
@@ -26,7 +26,7 @@ module.exports = {
 
 	},
 
-	stats : function(req,res,next){
+	stats: function(req, res, next) {
 
 		var regionOption = req.collects;
 
@@ -109,40 +109,75 @@ module.exports = {
 
 			var percentageStats = {};
 
-			var calculatePercentageFor = ['construction_completed','construction_in_progress','construction_not_started','grant_received','grant_not_received','applied_for_second_installment','not_applied_for_second_installment'];
+			var calculatePercentageFor = ['construction_completed', 'construction_in_progress', 'construction_not_started', 'grant_received', 'grant_not_received', 'applied_for_second_installment', 'not_applied_for_second_installment'];
 
-			calculatePercentageFor.forEach(function(eachstat){
+			calculatePercentageFor.forEach(function(eachstat) {
 
-				if(regionStats[eachstat]){
-					percentageStats[eachstat] = (regionStats[eachstat]/regionStats['surveys']) * 100;
+				if (regionStats[eachstat]) {
+					percentageStats[eachstat] = (regionStats[eachstat] / regionStats['surveys']) * 100;
 					percentageStats[eachstat] = percentageStats[eachstat] > 0.5 ? Math.round(percentageStats[eachstat]) : Math.round(percentageStats[eachstat] * 100) / 100;
 				}
 
 			});
 
+			req.regionStats = regionStats;
+			req.percentageStats = percentageStats;
 
-			return res.json({
-				success: 1,
-				stats: regionStats,
-				percentageStats,
-				message : "Stats fetched successfully"
-			})
+
+			var beneficiariesueryOptions = {
+
+				table: 'beneficiaries'
+
+			};
+
+			if (!regionOption.district) {
+				beneficiariesueryOptions.column = 'district';
+				beneficiariesueryOptions.row_name = 'district_code';
+				return dbInstance.sequelize.query(queryGen.generatorForbeneficiaries(beneficiariesueryOptions));
+
+			} else {
+				beneficiariesueryOptions.column = 'vdc';
+				beneficiariesueryOptions.row_name = 'vdc_mun_code';
+				return dbInstance.sequelize.query(queryGen.generatorForbeneficiariesVDC(beneficiariesueryOptions, regionOption));
+			}
 
 
 
 		})
-		.catch(function(err){
+
+		.then(function(responses) {
+
+			if (responses && responses.length && responses[0].length) {
+				var beneficiariesStats = responses[0][0];
+			}
+
+			var apiResponse = {
+				success: 1,
+				stats: req.regionStats,
+				percentageStats: req.percentageStats,
+				message: "Stats fetched successfully"
+			};
+
+			if (beneficiariesStats) {
+				apiResponse['beneficiariesStats'] = beneficiariesStats;
+			}
+
+			return res.json(apiResponse);
+
+		})
+
+		.catch(function(err) {
 			return res.json({
-				success : 0,
-				error : 1,
-				message : err
+				success: 0,
+				error: 1,
+				message: err
 			})
 		})
 
 	},
 
 
-	initialStats :  function(req,res){
+	initialStats: function(req, res) {
 
 		// second_installment.count({
 

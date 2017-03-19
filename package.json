@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "apidoc": "^0.17.5",
+    "app-root-path": "^2.0.1",
     "body-parser": "~1.15.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
@@ -16,8 +17,10 @@
     "google-caja": "0.0.2",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
+    "node-xlsx": "^0.7.4",
     "pg": "^6.1.4",
     "sequelize": "^3.30.2",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "xlsx": "^0.9.3"
   }
 }

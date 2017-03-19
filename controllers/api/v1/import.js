@@ -8,6 +8,12 @@ var config = require('../../../config');
 
 var dbInstance = require('../../../models');
 
+var xlsx = require('node-xlsx');
+
+var XLSX = require('xlsx');
+
+var appRootPath = require('app-root-path');
+
 function allPromisesGenerator(on, columnname, option, concernedEntities, t) {
 
 	var promises = [];
@@ -341,6 +347,93 @@ module.exports = {
 				})
 
 			})
+
+
+
+	},
+
+
+
+	beneficiariesCreate : function(req,res,next){
+
+
+		var filename = req.body.xlsfilename;
+
+		var fullFileName = 'surveyorslist_'+filename+'.xlsx';
+
+		console.log('RUNNING CREATE FOR ' + fullFileName);
+
+		var obj = xlsx.parse(appRootPath+'/data/'+fullFileName); 
+
+		// var jsonObj = JSON.parse(JSON.stringify(obj[0]['data'])) 
+		var dataObj = obj[0]['data'];
+
+		var beneficiaryPromises = [];
+
+		function beneficiaryPromiseCreator(beneficiary){
+
+			var createOptions = {
+
+				sn : beneficiary[0],
+
+				name : beneficiary[1],
+
+				district : beneficiary[2],
+
+				district_code : beneficiary[10].split('-')[0]  ,
+
+				vdc_mun : beneficiary[3],
+
+				vdc_mun_code : beneficiary[10].split('-')[1],
+
+				ward : beneficiary[4],
+
+				ea : beneficiary[5],
+
+				owner_id : beneficiary[6],
+
+				slip_no : beneficiary[7],
+
+				hh_sn : beneficiary[8],
+
+				ben_type : beneficiary[9],
+
+				pa_no : beneficiary[10]
+
+			};
+
+			return beneficiaries.create(createOptions);
+
+		}
+
+		for(var beneficiary=1 ; beneficiary<dataObj.length ; beneficiary++){
+
+			beneficiaryPromises.push(beneficiaryPromiseCreator(dataObj[beneficiary]));
+
+		}
+
+
+		return Promise.all(beneficiaryPromises)
+			.then(function(result) {
+				if (result) {
+					return res.json({
+						success: 1,
+						message: "Beneficiaries created successfully !"
+					})
+				}
+
+			})
+			.catch(function(err) {
+
+				return res.json({
+					success: 0,
+					error: 1,
+					message: err
+				})
+
+			})
+
+
 
 
 
