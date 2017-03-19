@@ -18,12 +18,40 @@ module.exports = {
 		if (queryOptions.where) {
 
 			for (var filter in queryOptions.where) {
-				
+
 			}
 
 		}
 
 		return query;
+
+	},
+
+	extrapolate: function(queryOptions, regionOption) {
+
+		if (!regionOption.district) {
+			var codes = config.codes['district'];
+		} else {
+			var codes = config.codes['vdc'][regionOption.district].split(' ');
+		}
+
+
+
+		var query = "SELECT ";
+		for (var code in codes) {
+			var codeName = !regionOption.district ? code : 'vdc';
+			var concernedRow = !regionOption.district ? 'district' : 'vdc';
+			query = query + " COUNT ( CASE WHEN  " + queryOptions.join.table + "." + queryOptions.join.on + "= '" + queryOptions.join.value + "' AND records." + concernedRow + "='" + codes[code] + "' THEN 1 END) AS " + codeName + "$" + codes[code];
+
+			if (Object.keys(codes).indexOf(code) < Object.keys(codes).length - 1) {
+				query = query + " , ";
+			}
+		}
+
+		query = query + " FROM  records " + " INNER JOIN " + queryOptions.join.table + " ON " + queryOptions.join.table + ".record_id=records.id ";
+
+		return query;
+
 
 	},
 
@@ -59,7 +87,7 @@ module.exports = {
 	},
 
 
-	generatorForbeneficiaries : function(queryOptions){
+	generatorForbeneficiaries: function(queryOptions) {
 
 		var codes = config.codes[queryOptions.column];
 		var query = "SELECT ";
@@ -78,7 +106,7 @@ module.exports = {
 
 	},
 
-	generatorForbeneficiariesVDC : function(queryOptions,regionOption){
+	generatorForbeneficiariesVDC: function(queryOptions, regionOption) {
 
 		if (regionOption.district && config.codes[queryOptions.column][regionOption.district]) {
 
@@ -88,16 +116,16 @@ module.exports = {
 			codes.forEach(function(code, index) {
 
 
-				query = query + "COUNT ( CASE WHEN " + queryOptions.row_name + " ='" + Number(code.slice(regionOption.district.length,code.length)).toString() + "' THEN 1 END ) AS vdc$" + formatVdc.unformat(code);
+				query = query + "COUNT ( CASE WHEN " + queryOptions.row_name + " ='" + Number(code.slice(regionOption.district.length, code.length)).toString() + "' THEN 1 END ) AS vdc$" + formatVdc.unformat(code);
 				if (index < (codes).length - 1) {
 					query = query + ",";
 				}
 			})
 
-			query = query + " FROM  " + queryOptions.table +" WHERE district_code='"+regionOption.district+"'" ;
+			query = query + " FROM  " + queryOptions.table + " WHERE district_code='" + regionOption.district + "'";
 
 			if (regionOption.vdc) {
-				query = query + " AND vdc_mun_code='" + Number(regionOption.vdc.slice(regionOption.district.length,regionOption.vdc.length)).toString()  + "'";
+				query = query + " AND vdc_mun_code='" + Number(regionOption.vdc.slice(regionOption.district.length, regionOption.vdc.length)).toString() + "'";
 
 			}
 

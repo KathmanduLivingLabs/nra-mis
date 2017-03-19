@@ -74,7 +74,7 @@ module.exports = (router) => {
 	    * @apiVersion 1.0.0
 	    */
 
-	router.get('/api/v1/mis/region/records', recordsFn.collect , recordsFn.stats );
+	router.get('/api/v1/mis/region/records', recordsFn.collect, recordsFn.stats, recordsFn.allregionStats);
 
 	router.get('/api/v1/mis/records', recordsFn.initialStats);
 

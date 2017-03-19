@@ -22,19 +22,19 @@ module.exports = {
 
 		});
 
-		if(req.collects.district === "*"){
+		if (req.collects.district === "*") {
 			delete req.collects.district;
 		}
 
-		if(req.collects.vdc){
+		if (req.collects.vdc) {
 
-			if(req.collects.vdc === "*"){
+			if (req.collects.vdc === "*") {
 				delete req.collects.vdc;
-			}else{
+			} else {
 				req.collects.vdc = formatVdc.format(req.collects.vdc);
 			}
 		}
-		
+
 		// console.log('&&&&&&',req.collects)
 
 		return next();
@@ -127,19 +127,16 @@ module.exports = {
 
 			var vdcStatsCount = 0;
 
-			for(var vdcStat in vdcStats){
+			for (var vdcStat in vdcStats) {
 				vdcStatsCount = vdcStatsCount + Number(vdcStats[vdcStat]);
 			}
-			
+
 			vdcStats.total = vdcStatsCount;
 
 			req.regionStats = regionStats;
 
 			req.vdcStats = vdcStats;
 
-
-
-			
 
 
 			var beneficiariesueryOptions = {
@@ -170,9 +167,7 @@ module.exports = {
 				var beneficiariesStats = responses[0][0];
 			}
 
-			
 
-			
 
 			var apiResponse = {
 				success: 1,
@@ -182,10 +177,13 @@ module.exports = {
 			};
 
 			if (beneficiariesStats) {
+
+				req.beneficiariesStats = beneficiariesStats;
+
 				apiResponse['beneficiariesStats'] = beneficiariesStats;
 
 				var beneficiariesCount = 0;
-				for(var beneficiary in beneficiariesStats){
+				for (var beneficiary in beneficiariesStats) {
 					beneficiariesCount = beneficiariesCount + Number(beneficiariesStats[beneficiary]);
 				}
 
@@ -196,17 +194,17 @@ module.exports = {
 
 				var beneficiaryReachPercentage = {};
 				// console.log('$$$$$$$$$$',req.beneficiariesStats)
-				for(var eachstat in beneficiariesStats){
+				for (var eachstat in beneficiariesStats) {
 					// console.log('%%%%%%%%%',eachstat,beneficiariesStats[eachstat])
-					if(beneficiariesStats[eachstat] && Number(beneficiariesStats[eachstat])){
+					if (beneficiariesStats[eachstat] && Number(beneficiariesStats[eachstat])) {
 						// console.log('****',req.vdcStats[regionalStat],regionalStat,'!!!!!!',beneficiariesStats[regionalStat])
-						beneficiaryReachPercentage[eachstat] = (Number(req.vdcStats[eachstat])/Number(beneficiariesStats[eachstat])) * 100;
+						beneficiaryReachPercentage[eachstat] = (Number(req.vdcStats[eachstat]) / Number(beneficiariesStats[eachstat])) * 100;
 						// console.log('!~~~~~~~~~~~~~`',beneficiaryReachPercentage[regionalStat])
 						beneficiaryReachPercentage[eachstat] = beneficiaryReachPercentage[eachstat] > 0.5 ? Math.round(beneficiaryReachPercentage[eachstat]) : Math.round(beneficiaryReachPercentage[eachstat] * 100) / 100;
-					}else{
+					} else {
 						beneficiaryReachPercentage[eachstat] = 0;
 					}
-					
+
 				}
 
 				apiResponse['beneficiaryReachPercentage'] = beneficiaryReachPercentage;
@@ -219,12 +217,12 @@ module.exports = {
 
 			calculatePercentageFor.forEach(function(eachstat) {
 
-				if (regionStats[eachstat] && Number(regionStats['surveys'])) { 
+				if (regionStats[eachstat] && Number(regionStats['surveys'])) {
 					percentageStats[eachstat] = (regionStats[eachstat] / beneficiariesStats['total']) * 100;
 					// percentageStats[eachstat] = (regionStats[eachstat] / regionStats['surveys']) * 100;
-				
+
 					percentageStats[eachstat] = percentageStats[eachstat] > 0.5 ? Math.round(percentageStats[eachstat]) : Math.round(percentageStats[eachstat] * 100) / 100;
-				}else{
+				} else {
 					percentageStats[eachstat] = 0;
 				}
 
@@ -234,24 +232,24 @@ module.exports = {
 
 			var finalApiResponse = {
 
-				"success" : 1,
-				"stats" : {
-					"survey_status" : {
-						"surveys" : apiResponse.stats.surveys,
-						"surveyors" : apiResponse.stats.surveyors
+				"success": 1,
+				"stats": {
+					"survey_status": {
+						"surveys": apiResponse.stats.surveys,
+						"surveyors": apiResponse.stats.surveyors
 					},
-					"construction_status" : {
+					"construction_status": {
 						"Completed": apiResponse.stats.construction_completed,
 						"In Progress": apiResponse.stats.construction_in_progress,
 						"Not Started": apiResponse.stats.construction_not_started
 
 					},
-					"grant_status" : {
+					"grant_status": {
 						"Received": apiResponse.stats.grant_received,
 						"Not Received": apiResponse.stats.grant_not_received
 
 					},
-					"installment_status" : {
+					"installment_status": {
 						"Applied": apiResponse.stats.applied_for_second_installment,
 						"Not Applied": apiResponse.stats.not_applied_for_second_installment
 
@@ -274,6 +272,7 @@ module.exports = {
 					"regionalStats": apiResponse.beneficiaryReachPercentage
 
 				},
+				"numericalStats": {},
 				"message": "Stats fetched successfully"
 
 
@@ -281,12 +280,19 @@ module.exports = {
 			}
 
 
+			req.finalApiResponse = finalApiResponse;
 
 
 
-			return res.json(finalApiResponse);
+			// return res.json(finalApiResponse);
+
+			return next();
+
+
 
 		})
+
+
 
 		.catch(function(err) {
 			return res.json({
@@ -526,6 +532,174 @@ module.exports = {
 		// 	.catch(function(err){
 		// 		console.log(err);
 		// 	})
+
+	},
+
+
+	allregionStats: function(req, res, next) {
+
+
+		if (!req.collects.district) {
+
+			var regionOption = req.collects;
+
+			var numericalStats = {};
+
+
+
+			var recordsqueryOptions = {
+				join: {
+					table: 'house_statuses',
+					on: 'status',
+					value: '1'
+				}
+			};
+
+			return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption))
+
+			.then(function(construction_completedresponse) {
+
+
+
+				numericalStats.construction = {};
+				numericalStats.construction.completed = construction_completedresponse[0][0];
+
+				var recordsqueryOptions = {
+					join: {
+						table: 'house_statuses',
+						on: 'status',
+						value: '2'
+					}
+				};
+
+				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+
+
+			})
+
+			.then(function(construction_inprogress_esponse) {
+
+
+				numericalStats.construction.inprogress = construction_inprogress_esponse[0][0];
+
+				var recordsqueryOptions = {
+					join: {
+						table: 'house_statuses',
+						on: 'status',
+						value: '3'
+					}
+				};
+
+				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+
+
+			})
+
+			.then(function(construction_not_started_response) {
+
+
+				numericalStats.construction.not_started = construction_not_started_response[0][0];
+
+				var recordsqueryOptions = {
+					join: {
+						table: 'second_installments',
+						on: 'applied_for_second_installment',
+						value: '1'
+					}
+				};
+
+				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+
+
+
+			})
+
+			.then(function(applied_for_second_installment) {
+
+					numericalStats.second_installment = {};
+
+					numericalStats.second_installment.applied = applied_for_second_installment[0][0];
+
+					var recordsqueryOptions = {
+						join: {
+							table: 'second_installments',
+							on: 'applied_for_second_installment',
+							value: '2'
+						}
+					};
+
+					return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+
+
+
+				})
+				.then(function(not_applied_for_second_installment) {
+
+
+					numericalStats.second_installment.not_applied = not_applied_for_second_installment[0][0];
+
+					var recordsqueryOptions = {
+						join: {
+							table: 'grant_receiveds',
+							on: 'grant_received',
+							value: '1'
+						}
+					};
+
+					return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+
+
+
+				})
+
+			.then(function(grant_received) {
+
+				numericalStats.grant_received = {};
+				numericalStats.grant_received.received = grant_received[0][0];
+
+				var recordsqueryOptions = {
+					join: {
+						table: 'grant_receiveds',
+						on: 'grant_received',
+						value: '2'
+					}
+				};
+
+				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+
+
+			})
+
+			.then(function(grant_not_received) {
+
+
+
+				numericalStats.grant_received.not_received = grant_not_received[0][0];
+				numericalStats.beneficiariesStats = req.beneficiariesStats
+				req.finalApiResponse.numericalStats = Object.assign(req.finalApiResponse.numericalStats, numericalStats);
+
+
+				return res.json(req.finalApiResponse);
+
+
+
+			})
+
+			.catch(function(err) {
+				return res.json({
+					success: 0,
+					error: 1,
+					message: err
+				})
+			})
+
+		} else {
+
+
+
+			return res.json(req.finalApiResponse);
+
+		}
 
 	}
 
