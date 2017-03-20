@@ -12,7 +12,7 @@ module.exports = {
 
 		req.collects = {};
 
-		var fields = ['district', 'vdc'];
+		var fields = ['district', 'vdc', 'ns'];
 
 		fields.forEach((field) => {
 
@@ -539,144 +539,141 @@ module.exports = {
 	allregionStats: function(req, res, next) {
 
 
-		if (!req.collects.district) {
+		if (req.collects.ns) {
 
 			var regionOption = req.collects;
 
-			var numericalStats = {};
+			function numericalStatPromiseGenerator(recordsqueryOptions, regionOption) {
+
+				return new Promise(function(resolve, reject) {
+
+					dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption))
+						.then(function(response) {
+							resolve({
+								obj: response,
+								title: recordsqueryOptions.title
+							});
+						})
+						.catch(function(err) {
+							reject(err);
+						})
+				})
 
 
 
-			var recordsqueryOptions = {
-				join: {
-					table: 'house_statuses',
-					on: 'status',
-					value: '1'
-				}
-			};
+			}
 
-			return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption))
-
-			.then(function(construction_completedresponse) {
-
-
-
-				numericalStats.construction = {};
-				numericalStats.construction.completed = construction_completedresponse[0][0];
-
-				var recordsqueryOptions = {
-					join: {
+			var calculateStatsFor = [{
+					"join": {
+						table: 'house_statuses',
+						on: 'status',
+						value: '1'
+					},
+					"title": {
+						heading: "construction",
+						subtitle: "completed"
+					}
+				}, {
+					"join": {
 						table: 'house_statuses',
 						on: 'status',
 						value: '2'
+					},
+					"title": {
+						heading: "construction",
+						subtitle: "inprogress"
 					}
-				};
-
-				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
-
-
-			})
-
-			.then(function(construction_inprogress_esponse) {
-
-
-				numericalStats.construction.inprogress = construction_inprogress_esponse[0][0];
-
-				var recordsqueryOptions = {
-					join: {
+				}, {
+					"join": {
 						table: 'house_statuses',
 						on: 'status',
 						value: '3'
+					},
+					"title": {
+						heading: "construction",
+						subtitle: "not_started"
 					}
-				};
+				},
 
-				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
-
-
-			})
-
-			.then(function(construction_not_started_response) {
-
-
-				numericalStats.construction.not_started = construction_not_started_response[0][0];
-
-				var recordsqueryOptions = {
-					join: {
+				{
+					"join": {
 						table: 'second_installments',
 						on: 'applied_for_second_installment',
 						value: '1'
+					},
+					"title": {
+						heading: "second_installment",
+						subtitle: "applied"
 					}
-				};
+				},
 
-				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+				{
+					"join": {
+						table: 'second_installments',
+						on: 'applied_for_second_installment',
+						value: '2'
+					},
+					"title": {
+						heading: "second_installment",
+						subtitle: "not_applied"
+					}
+				},
 
+				{
+					"join": {
+						table: 'grant_receiveds',
+						on: 'grant_received',
+						value: '1'
+					},
+					"title": {
+						heading: "grant",
+						subtitle: "received"
+					}
+				},
 
-
-			})
-
-			.then(function(applied_for_second_installment) {
-
-					numericalStats.second_installment = {};
-
-					numericalStats.second_installment.applied = applied_for_second_installment[0][0];
-
-					var recordsqueryOptions = {
-						join: {
-							table: 'second_installments',
-							on: 'applied_for_second_installment',
-							value: '2'
-						}
-					};
-
-					return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
-
-
-
-				})
-				.then(function(not_applied_for_second_installment) {
-
-
-					numericalStats.second_installment.not_applied = not_applied_for_second_installment[0][0];
-
-					var recordsqueryOptions = {
-						join: {
-							table: 'grant_receiveds',
-							on: 'grant_received',
-							value: '1'
-						}
-					};
-
-					return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
-
-
-
-				})
-
-			.then(function(grant_received) {
-
-				numericalStats.grant_received = {};
-				numericalStats.grant_received.received = grant_received[0][0];
-
-				var recordsqueryOptions = {
-					join: {
+				{
+					"join": {
 						table: 'grant_receiveds',
 						on: 'grant_received',
 						value: '2'
+					},
+					"title": {
+						heading: "grant",
+						subtitle: "not_received"
 					}
-				};
-
-				return dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption));
+				},
 
 
+
+			];
+
+			var numericalStatsPromises = [];
+
+			calculateStatsFor.forEach(function(calculate) {
+				numericalStatsPromises.push(numericalStatPromiseGenerator(calculate, regionOption));
 			})
 
-			.then(function(grant_not_received) {
+			return Promise.all(numericalStatsPromises)
 
 
 
-				numericalStats.grant_received.not_received = grant_not_received[0][0];
-				numericalStats.beneficiariesStats = req.beneficiariesStats
-				req.finalApiResponse.numericalStats = Object.assign(req.finalApiResponse.numericalStats, numericalStats);
+			.then(function(allresponses) {
+
+				var ns = {};
+				allresponses.forEach(function(response) {
+
+					if (!ns[response.title.heading]) {
+						ns[response.title.heading] = {}
+					}
+
+					ns[response.title.heading][response.title.subtitle] = response.obj[0][0];
+
+
+				})
+
+
+				ns.beneficiariesStats = req.beneficiariesStats;
+				req.finalApiResponse.numericalStats = Object.assign(req.finalApiResponse.numericalStats, ns);
 
 
 				return res.json(req.finalApiResponse);
