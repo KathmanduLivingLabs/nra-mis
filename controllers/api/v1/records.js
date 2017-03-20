@@ -746,6 +746,15 @@ module.exports = {
 
 				// })
 
+				if(req.collects.district){
+					for(var stat in ns){
+						var tempvalue = ns[stat];
+						var statstring = 'vdc$'+formatVdc.unformat(stat.split('$')[1]);
+						ns[statstring] = tempvalue;
+						delete ns[stat];
+					}
+				}
+
 
 				for (var stat in req.beneficiariesStats) {
 					if (ns[stat]) {
