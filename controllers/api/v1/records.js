@@ -187,7 +187,8 @@ module.exports = {
 					beneficiariesCount = beneficiariesCount + Number(beneficiariesStats[beneficiary]);
 				}
 
-				beneficiariesStats['total'] = beneficiariesCount;
+				// beneficiariesStats['total'] = beneficiariesCount;
+				req.beneficiariesCount = beneficiariesCount;
 
 				// console.log('HERAMMMM',beneficiariesCount)
 
@@ -237,7 +238,7 @@ module.exports = {
 					"survey_status": {
 						"surveys": apiResponse.stats.surveys,
 						"surveyors": apiResponse.stats.surveyors,
-						"beneficiaries" : req.beneficiariesStats.total
+						"beneficiaries" : req.beneficiariesCount
 					},
 					"construction_status": {
 						"Completed": apiResponse.stats.construction_completed,
