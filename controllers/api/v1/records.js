@@ -661,19 +661,48 @@ module.exports = {
 			.then(function(allresponses) {
 
 				var ns = {};
-				allresponses.forEach(function(response) {
 
-					if (!ns[response.title.heading]) {
-						ns[response.title.heading] = {}
+				allresponses.forEach(function(response){
+
+					for (var region in response.obj[0][0]){
+						if(!ns[region]){
+							ns[region] = {};
+						}
+
+						if(!ns[region][response.title.heading]){
+							ns[region][response.title.heading]= {};
+						}
+
+						ns[region][response.title.heading][response.title.subtitle] = response.obj[0][0][region];
+
 					}
-
-					ns[response.title.heading][response.title.subtitle] = response.obj[0][0];
-
 
 				})
 
 
-				ns.beneficiariesStats = req.beneficiariesStats;
+				// console.log('@#!#!@#@!',ns);
+
+
+
+				// allresponses.forEach(function(response) {
+
+				// 	if (!ns[response.title.heading]) {
+				// 		ns[response.title.heading] = {}
+				// 	}
+
+				// 	ns[response.title.heading][response.title.subtitle] = response.obj[0][0];
+
+
+				// })
+
+
+				for(var stat in req.beneficiariesStats){
+					if(ns[stat]){
+						ns[stat]['beneficiaries'] = req.beneficiariesStats[stat];
+					}
+				}
+
+				// ns.beneficiariesStats = req.beneficiariesStats;
 				req.finalApiResponse.numericalStats = Object.assign(req.finalApiResponse.numericalStats, ns);
 
 
