@@ -238,7 +238,7 @@ module.exports = {
 					"survey_status": {
 						"surveys": apiResponse.stats.surveys,
 						"surveyors": apiResponse.stats.surveyors,
-						"beneficiaries" : req.beneficiariesCount
+						"beneficiaries": req.beneficiariesCount
 					},
 					"construction_status": {
 						"Completed": apiResponse.stats.construction_completed,
@@ -537,6 +537,57 @@ module.exports = {
 	},
 
 
+	getRegionnames: function(req, res, next) {
+
+		if (req.collects.ns) {
+
+
+
+			if (!req.collects.district) {
+				var query = 'select distinct(district),district_code from beneficiaries';
+				var codeName = 'district_code';
+				var columnName = 'district';
+			} else {
+				var query = 'select distinct(vdc_mun),vdc_mun_code from beneficiaries';
+				var codeName = 'vdc_mun_code';
+				var columnName = 'vdc_mun';
+			}
+
+			dbInstance.sequelize.query(query)
+				.then(function(response) {
+
+					var regionNames = {};
+
+					response[0].forEach(function(region) {
+						regionNames[region[codeName]] = region[columnName];
+					})
+
+					console.log('@#!@#@!', regionNames)
+
+					req.regionCodes = regionNames;
+
+
+
+					// response[0][0]
+
+					return next();
+
+				})
+				.catch(function(err) {
+					return res.json({
+						success: 0,
+						message: err
+					})
+				})
+
+
+		} else {
+			return next();
+		}
+
+	},
+
+
 	allregionStats: function(req, res, next) {
 
 
@@ -662,15 +713,15 @@ module.exports = {
 
 				var ns = {};
 
-				allresponses.forEach(function(response){
+				allresponses.forEach(function(response) {
 
-					for (var region in response.obj[0][0]){
-						if(!ns[region]){
+					for (var region in response.obj[0][0]) {
+						if (!ns[region]) {
 							ns[region] = {};
 						}
 
-						if(!ns[region][response.title.heading]){
-							ns[region][response.title.heading]= {};
+						if (!ns[region][response.title.heading]) {
+							ns[region][response.title.heading] = {};
 						}
 
 						ns[region][response.title.heading][response.title.subtitle] = response.obj[0][0][region];
@@ -696,10 +747,30 @@ module.exports = {
 				// })
 
 
-				for(var stat in req.beneficiariesStats){
-					if(ns[stat]){
-						ns[stat]['beneficiaries'] = req.beneficiariesStats[stat];
+				for (var stat in req.beneficiariesStats) {
+					if (ns[stat]) {
+						if (!ns[stat]['beneficiaries']) {
+							ns[stat]['beneficiaries'] = {};
+						}
+
+						ns[stat]['beneficiaries']['total'] = req.beneficiariesStats[stat];
+						ns[stat]['beneficiaries']['surveyed'] = req.vdcStats[stat];
+
 					}
+				}
+
+				for (var region in ns) {
+
+					var regionCode = region.split('$')[1].toString();
+					if (req.collects.district) {
+						regionCode = Number(regionCode.slice(req.collects.district.length, regionCode.length)).toString();
+					}
+					if (req.regionCodes[regionCode]) {
+						var tempvalue = ns[region];
+						delete ns[region];
+						ns[req.regionCodes[regionCode] + '$' + region.split('$')[1]] = tempvalue;
+					}
+
 				}
 
 				// ns.beneficiariesStats = req.beneficiariesStats;
