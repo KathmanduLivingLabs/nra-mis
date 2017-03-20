@@ -236,7 +236,8 @@ module.exports = {
 				"stats": {
 					"survey_status": {
 						"surveys": apiResponse.stats.surveys,
-						"surveyors": apiResponse.stats.surveyors
+						"surveyors": apiResponse.stats.surveyors,
+						"beneficiaries" : req.beneficiariesStats.total
 					},
 					"construction_status": {
 						"Completed": apiResponse.stats.construction_completed,
@@ -281,7 +282,6 @@ module.exports = {
 
 
 			req.finalApiResponse = finalApiResponse;
-
 
 
 			// return res.json(finalApiResponse);
