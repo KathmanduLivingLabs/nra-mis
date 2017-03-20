@@ -218,7 +218,7 @@ module.exports = {
 			calculatePercentageFor.forEach(function(eachstat) {
 
 				if (regionStats[eachstat] && Number(regionStats['surveys'])) {
-					percentageStats[eachstat] = (regionStats[eachstat] / beneficiariesStats['total']) * 100;
+					percentageStats[eachstat] = (regionStats[eachstat] / regionStats['surveys']) * 100;
 					// percentageStats[eachstat] = (regionStats[eachstat] / regionStats['surveys']) * 100;
 
 					percentageStats[eachstat] = percentageStats[eachstat] > 0.5 ? Math.round(percentageStats[eachstat]) : Math.round(percentageStats[eachstat] * 100) / 100;
