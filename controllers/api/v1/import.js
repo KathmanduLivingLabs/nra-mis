@@ -125,200 +125,214 @@ module.exports = {
 			var recordId;
 
 
-			return dbInstance.sequelize.transaction(function(t) {
-					return records
-						.create(recordsOptions, {
-							transaction: t
-						})
-						.then(function(response) {
-							if (response && response.id) {
+			return records.findAll({
+				where : {
+					ona_record_id : recordsOptions.ona_record_id.toString()
+				}
+			})
+			.then(function(recordexits){
+				if(recordexits && recordexits.length){
+					return true;
+				}else{
 
-
-								recordId = response.id;
-
-								var houseStatusOptions = {
-									record_id: recordId,
-									status: record["g3/g3_a/house_status"],
-									cost: record["g3/g3_b/cost_1"] || record["g3/g3_c/cost_2"] || record["g3/g3_d/cost_3"],
-									house_design_followed: record["g3/g3_b/house_design_1"] || record["g3/g3_c/house_design_2"] || record["g3/g3_d/house_design_3"],
-									specify_house_design_followed: record["g3/g3_b/house_design_other_1"] || record["g3/g3_c/house_design_other_2"] || record["g3/g3_d/house_design_other_3"],
-									building_foundation: record["g3/g3_b/building_foundation_1"] || record["g3/g3_b/building_foundation_2"] || record["g3/g3_b/building_foundation_3"],
-									specify_building_foundation: record["g3/g3_b/building_foundation_other_1"] || record["g3/g3_b/building_foundation_other_2"] || record["g3/g3_b/building_foundation_other_3"],
-									roof_design: record["g3/g3_b/roof_design_1"] || record["g3/g3_c/roof_design_2"] || record["g3/g3_d/roof_design_3"],
-									specify_roof_design: record["g3/g3_b/roof_design_other_1"] || record["g3/g3_c/roof_design_other_2"] || record["g3/g3_d/roof_design_other_3"],
-									funding_source: record["g3/g3_b/funding_source_1"] || record["g3/g3_c/funding_source_2"] || record["g3/g3_c/funding_source_3"],
-									specify_funding_source: record["g3/g3_b/funding_source_other_1"] || record["g3/g3_c/funding_source_other_2"] || record["g3/g3_c/funding_source_other_3"],
-									building_code_followed: record["g3/g3_b/codes_followed_1"] || record["g3/g3_c/codes_followed_2"] || record["g3/g3_d/codes_followed_3"],
-									code_not_followed: record["g3/g3_b/code_not_followed_1"] || record["g3/g3_c/code_not_followed_2"] || record["g3/g3_d/code_not_followed_3"],
-									specify_why_not_followed: record["g3/g3_b/code_not_followed_other_1"] || record["g3/g3_c/code_not_followed_other_2"] || record["g3/g3_d/code_not_followed_other_3"]
-
-								};
-
-								return house_status.create(houseStatusOptions, {
+					return dbInstance.sequelize.transaction(function(t) {
+							return records
+								.create(recordsOptions, {
 									transaction: t
-								});
+								})
+								.then(function(response) {
+									if (response && response.id) {
 
 
-							} else {
+										recordId = response.id;
 
-								throw "Error creating record";
+										var houseStatusOptions = {
+											record_id: recordId,
+											status: record["g3/g3_a/house_status"],
+											cost: record["g3/g3_b/cost_1"] || record["g3/g3_c/cost_2"] || record["g3/g3_d/cost_3"],
+											house_design_followed: record["g3/g3_b/house_design_1"] || record["g3/g3_c/house_design_2"] || record["g3/g3_d/house_design_3"],
+											specify_house_design_followed: record["g3/g3_b/house_design_other_1"] || record["g3/g3_c/house_design_other_2"] || record["g3/g3_d/house_design_other_3"],
+											building_foundation: record["g3/g3_b/building_foundation_1"] || record["g3/g3_b/building_foundation_2"] || record["g3/g3_b/building_foundation_3"],
+											specify_building_foundation: record["g3/g3_b/building_foundation_other_1"] || record["g3/g3_b/building_foundation_other_2"] || record["g3/g3_b/building_foundation_other_3"],
+											roof_design: record["g3/g3_b/roof_design_1"] || record["g3/g3_c/roof_design_2"] || record["g3/g3_d/roof_design_3"],
+											specify_roof_design: record["g3/g3_b/roof_design_other_1"] || record["g3/g3_c/roof_design_other_2"] || record["g3/g3_d/roof_design_other_3"],
+											funding_source: record["g3/g3_b/funding_source_1"] || record["g3/g3_c/funding_source_2"] || record["g3/g3_c/funding_source_3"],
+											specify_funding_source: record["g3/g3_b/funding_source_other_1"] || record["g3/g3_c/funding_source_other_2"] || record["g3/g3_c/funding_source_other_3"],
+											building_code_followed: record["g3/g3_b/codes_followed_1"] || record["g3/g3_c/codes_followed_2"] || record["g3/g3_d/codes_followed_3"],
+											code_not_followed: record["g3/g3_b/code_not_followed_1"] || record["g3/g3_c/code_not_followed_2"] || record["g3/g3_d/code_not_followed_3"],
+											specify_why_not_followed: record["g3/g3_b/code_not_followed_other_1"] || record["g3/g3_c/code_not_followed_other_2"] || record["g3/g3_d/code_not_followed_other_3"]
 
-							}
-						})
-						.then(function(housestatusresponse) {
+										};
 
-							if (housestatusresponse && housestatusresponse.id) {
-
-								var grantOptions = {
-									record_id: recordId,
-									grant_received: record["g3/g3_e/received_grant"],
-									grant_spend_on: record["g3/g3_e/spent_grant"],
-									specify_grant_spend_on: record["g3/g3_e/spent_grant_other"],
-									reason_no_grant: record["g3/g3_e/reason_no_grant"],
-									specify_reason_no_grant: record["g3/g3_e/reason_no_grant_other"]
-
-								}
-
-								return grant_received.create(grantOptions, {
-									transaction: t
-								});
-
-							} else {
-								throw "Error creating house status";
-							}
-
-						})
-						.then(function(grantsresponse) {
-
-							if (grantsresponse && grantsresponse.id) {
-
-								var installmentOptions = {
-									record_id: recordId,
-									applied_for_second_installment: record["g3/g3_f/applied_sec_installment"],
-									how_long_since_applied: record["g3/g3_f/applied_how_long"],
-									why_not_applied: record["g3/g3_f/not_applied"],
-									specify_why_not_applied: record["g3/g3_f/not_applied_other"]
-								}
-
-								return second_installment.create(installmentOptions, {
-									transaction: t
-								});
-
-							} else {
-								throw "Error creating grants";
-							}
-
-						})
-
-					.then(function(installmentreponse) {
-						if (installmentreponse && installmentreponse.id) {
-
-							var flag = record['g4/top_priorities'];
-
-							if (flag) {
-
-								var concernedPriorites = flag.split(' ');
-
-								var priorityOption = {
-									recordId: recordId
-								}
-
-								var generatedPromises = allPromisesGenerator(priorities, 'priority', priorityOption, concernedPriorites, t);
-
-								return Promise.all(generatedPromises)
-
-							} else {
-								return true;
-							}
+										return house_status.create(houseStatusOptions, {
+											transaction: t
+										});
 
 
+									} else {
 
-						} else {
-							throw "Error creating installment"
-						}
-					})
+										throw "Error creating record";
 
-					.then(function(prioritiesresponse) {
+									}
+								})
+								.then(function(housestatusresponse) {
 
+									if (housestatusresponse && housestatusresponse.id) {
 
-						if (prioritiesresponse) {
+										var grantOptions = {
+											record_id: recordId,
+											grant_received: record["g3/g3_e/received_grant"],
+											grant_spend_on: record["g3/g3_e/spent_grant"],
+											specify_grant_spend_on: record["g3/g3_e/spent_grant_other"],
+											reason_no_grant: record["g3/g3_e/reason_no_grant"],
+											specify_reason_no_grant: record["g3/g3_e/reason_no_grant_other"]
 
+										}
 
-							var flag = record["g3/g3_b/superstructure_1"] || record["g3/g3_c/superstructure_2"] || record["g3/g3_d/superstructure_3"];
+										return grant_received.create(grantOptions, {
+											transaction: t
+										});
 
-							if (flag) {
-
-								var concernedSuperstructures = flag.split(' ');
-
-								var structureOption = {
-									recordId: recordId,
-									specify: record["g3/g3_b/superstructure_other_1"] || record["g3/g3_c/superstructure_other_2"] || record["g3/g3_d/superstructure_other_3"]
-								}
-
-								var generatedPromises = allPromisesGenerator(superstructures, 'structure', structureOption, concernedSuperstructures, t);
-
-								return Promise.all(generatedPromises);
-
-							} else {
-								return true;
-							}
-
-
-
-						} else {
-							throw "Error creating priorities"
-						}
-					})
-
-					.then(function(structuresresponse) {
-						if (structuresresponse) {
-
-							if (record["g3/g3_d/construction_not_started"]) {
-
-								var flag = record["g3/g3_d/construction_not_started"];
-
-								if (flag) {
-
-									var concerned = flag.split(' ');
-
-
-									var option = {
-										recordId: recordId,
-										specify: record["g3/g3_d/construction_not_started_other"]
+									} else {
+										throw "Error creating house status";
 									}
 
-									var generatedPromises = allPromisesGenerator(construction_not_started, 'construction_not_started', option, concerned, t);
+								})
+								.then(function(grantsresponse) {
 
-									return Promise.all(generatedPromises);
+									if (grantsresponse && grantsresponse.id) {
+
+										var installmentOptions = {
+											record_id: recordId,
+											applied_for_second_installment: record["g3/g3_f/applied_sec_installment"],
+											how_long_since_applied: record["g3/g3_f/applied_how_long"],
+											why_not_applied: record["g3/g3_f/not_applied"],
+											specify_why_not_applied: record["g3/g3_f/not_applied_other"]
+										}
+
+										return second_installment.create(installmentOptions, {
+											transaction: t
+										});
+
+									} else {
+										throw "Error creating grants";
+									}
+
+								})
+
+							.then(function(installmentreponse) {
+								if (installmentreponse && installmentreponse.id) {
+
+									var flag = record['g4/top_priorities'];
+
+									if (flag) {
+
+										var concernedPriorites = flag.split(' ');
+
+										var priorityOption = {
+											recordId: recordId
+										}
+
+										var generatedPromises = allPromisesGenerator(priorities, 'priority', priorityOption, concernedPriorites, t);
+
+										return Promise.all(generatedPromises)
+
+									} else {
+										return true;
+									}
+
+
+
 								} else {
-
-									return true;
+									throw "Error creating installment"
 								}
+							})
+
+							.then(function(prioritiesresponse) {
+
+
+								if (prioritiesresponse) {
+
+
+									var flag = record["g3/g3_b/superstructure_1"] || record["g3/g3_c/superstructure_2"] || record["g3/g3_d/superstructure_3"];
+
+									if (flag) {
+
+										var concernedSuperstructures = flag.split(' ');
+
+										var structureOption = {
+											recordId: recordId,
+											specify: record["g3/g3_b/superstructure_other_1"] || record["g3/g3_c/superstructure_other_2"] || record["g3/g3_d/superstructure_other_3"]
+										}
+
+										var generatedPromises = allPromisesGenerator(superstructures, 'structure', structureOption, concernedSuperstructures, t);
+
+										return Promise.all(generatedPromises);
+
+									} else {
+										return true;
+									}
 
 
 
-							} else {
+								} else {
+									throw "Error creating priorities"
+								}
+							})
 
-								return true;
+							.then(function(structuresresponse) {
+								if (structuresresponse) {
 
-							}
+									if (record["g3/g3_d/construction_not_started"]) {
+
+										var flag = record["g3/g3_d/construction_not_started"];
+
+										if (flag) {
+
+											var concerned = flag.split(' ');
+
+
+											var option = {
+												recordId: recordId,
+												specify: record["g3/g3_d/construction_not_started_other"]
+											}
+
+											var generatedPromises = allPromisesGenerator(construction_not_started, 'construction_not_started', option, concerned, t);
+
+											return Promise.all(generatedPromises);
+										} else {
+
+											return true;
+										}
 
 
 
-						} else {
-							throw "Error creating structures"
-						}
+									} else {
+
+										return true;
+
+									}
+
+
+
+								} else {
+									throw "Error creating structures"
+								}
+							})
+
+
+						})
+						.then(function(result) {
+							return result;
+						})
+
+					.catch(function(err) {
+						throw err;
 					})
 
-
-				})
-				.then(function(result) {
-					return result;
-				})
-
-			.catch(function(err) {
-				throw err;
+				}
 			})
+
 
 		}
 
