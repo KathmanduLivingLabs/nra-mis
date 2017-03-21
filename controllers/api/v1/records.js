@@ -144,26 +144,26 @@ module.exports = {
 				where : !regionOption.district ?  {} : { 'district' : regionOption.district }
 			}
 
-			// return beneficiariesCountModel.findAll(beneficiariesCountOptions);
+			return beneficiariesCountModel.findAll(beneficiariesCountOptions);
 
 
-			var beneficiariesueryOptions = { // old may of counting beneficiaries ************
+			// var beneficiariesueryOptions = { // old may of counting beneficiaries ************
 
-				table: 'beneficiaries'
+			// 	table: 'beneficiaries'
 
-			};
+			// };
 
-			if (!regionOption.district) {
-				beneficiariesueryOptions.column = 'district';
-				beneficiariesueryOptions.row_name = 'district_code';
-				return dbInstance.sequelize.query(queryGen.generatorForbeneficiaries(beneficiariesueryOptions));
+			// if (!regionOption.district) {
+			// 	beneficiariesueryOptions.column = 'district';
+			// 	beneficiariesueryOptions.row_name = 'district_code';
+			// 	return dbInstance.sequelize.query(queryGen.generatorForbeneficiaries(beneficiariesueryOptions));
 
-			} else {
+			// } else {
 
-				beneficiariesueryOptions.column = 'vdc';
-				beneficiariesueryOptions.row_name = 'vdc_mun_code';
-				return dbInstance.sequelize.query(queryGen.generatorForbeneficiariesVDC(beneficiariesueryOptions, regionOption));
-			}
+			// 	beneficiariesueryOptions.column = 'vdc';
+			// 	beneficiariesueryOptions.row_name = 'vdc_mun_code';
+			// 	return dbInstance.sequelize.query(queryGen.generatorForbeneficiariesVDC(beneficiariesueryOptions, regionOption));
+			// }
 
 
 
@@ -171,24 +171,24 @@ module.exports = {
 
 		.then(function(responses) {
 
-			// if(responses && responses.length){
-			// 	var amendedResponses = {};
-			// 	var onCode = !regionOption.district ? 'district_code' : 'vdc_code';
-			// 	responses.forEach(function(response){
-			// 		if(!amendedResponses[response[onCode]]){
-			// 			amendedResponses[response[onCode]] = response['count'];
-			// 		}
+			if(responses && responses.length){
+				var amendedResponses = {};
+				var onCode = !regionOption.district ? 'district_code' : 'vdc_code';
+				responses.forEach(function(response){
+					if(!amendedResponses[response[onCode]]){
+						amendedResponses[response[onCode]] = response['count'];
+					}
 
-			// 	})
-			// 	var beneficiariesStats = amendedResponses;
-			// }
+				})
+				var beneficiariesStats = amendedResponses;
+			}
 			
 
 
 
-			if (responses && responses.length && responses[0].length) { // old code for counting benficiaries
-				var beneficiariesStats = responses[0][0];
-			}
+			// if (responses && responses.length && responses[0].length) { // old code for counting benficiaries
+			// 	var beneficiariesStats = responses[0][0];
+			// }
 
 
 
