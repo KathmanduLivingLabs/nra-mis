@@ -548,7 +548,7 @@ module.exports = {
 				var codeName = 'district_code';
 				var columnName = 'district';
 			} else {
-				var query = 'select distinct(vdc_mun),vdc_mun_code from beneficiaries';
+				var query = "select distinct(vdc_mun),vdc_mun_code from beneficiaries where district_code='" + req.collects.district+"'";
 				var codeName = 'vdc_mun_code';
 				var columnName = 'vdc_mun';
 			}
