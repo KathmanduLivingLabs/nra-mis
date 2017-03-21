@@ -138,8 +138,16 @@ module.exports = {
 			req.vdcStats = vdcStats;
 
 
+			var beneficiariesCountModel = !regionOption.district ? district_beneficiaries : vdc_beneficiaries;
 
-			var beneficiariesueryOptions = {
+			var beneficiariesCountOptions = {
+				where : !regionOption.district ?  {} : { 'district' : regionOption.district }
+			}
+
+			// return beneficiariesCountModel.findAll(beneficiariesCountOptions);
+
+
+			var beneficiariesueryOptions = { // old may of counting beneficiaries ************
 
 				table: 'beneficiaries'
 
@@ -163,7 +171,22 @@ module.exports = {
 
 		.then(function(responses) {
 
-			if (responses && responses.length && responses[0].length) {
+			// if(responses && responses.length){
+			// 	var amendedResponses = {};
+			// 	var onCode = !regionOption.district ? 'district_code' : 'vdc_code';
+			// 	responses.forEach(function(response){
+			// 		if(!amendedResponses[response[onCode]]){
+			// 			amendedResponses[response[onCode]] = response['count'];
+			// 		}
+
+			// 	})
+			// 	var beneficiariesStats = amendedResponses;
+			// }
+			
+
+
+
+			if (responses && responses.length && responses[0].length) { // old code for counting benficiaries
 				var beneficiariesStats = responses[0][0];
 			}
 
@@ -1142,6 +1165,137 @@ module.exports = {
 			return res.json(req.finalApiResponse);
 		}
 
+
+
+	},
+
+
+
+	creteBeneficiariesCount : function(req,res,next){
+
+		var regionOption = req.collects;
+
+		var beneficiariesueryOptions = {
+
+			table: 'beneficiaries'
+
+		};
+
+		var operationLevel = !req.collects.district ? 'district' : 'vdc';
+
+		if (!regionOption.district) {
+			beneficiariesueryOptions.column = 'district';
+			beneficiariesueryOptions.row_name = 'district_code';
+			var queryOptions = queryGen.generatorForbeneficiaries(beneficiariesueryOptions);
+			
+
+		} else {
+
+			beneficiariesueryOptions.column = 'vdc';
+			beneficiariesueryOptions.row_name = 'vdc_mun_code';
+			var queryOptions = queryGen.generatorForbeneficiariesVDC(beneficiariesueryOptions, regionOption);
+		}
+
+		dbInstance.sequelize.query(queryOptions)
+			.then(function(beneficiariesresponse){
+
+				function countPromiseGenerator(options) {
+
+					var model = operationLevel === 'district' ? district_beneficiaries : vdc_beneficiaries;
+
+					return new Promise(function(resolve, reject) {
+
+						if (operationLevel === 'district') {
+							var whereOptions = {
+								district_code: options.district_code
+							}
+
+						} else {
+							var whereOptions = {
+								vdc_code: options.vdc_code,
+								district: options.district
+							}
+						}
+
+
+
+						model.findAll({
+								where: whereOptions
+							})
+							.then(function(res) {
+								if (res && res.length) {
+									model.update({
+										count: options.count
+									}, {
+										where: whereOptions
+									}).
+									then(function(updated) {
+											resolve(updated)
+										})
+										.catch(function(err) {
+											reject(err);
+										})
+								} else {
+									model.create(options)
+										.then(function(created) {
+											resolve(created);
+										})
+										.catch(function(err) {
+											reject(err);
+										})
+								}
+							})
+							.catch(function(err) {
+								reject(err);
+							})
+
+
+					})
+
+
+				}
+
+				var countPromises = [];
+
+				for(var response in beneficiariesresponse[0][0]){
+
+					if (operationLevel === 'district') {
+						var createOptions = {
+							district_code: response,
+							count: beneficiariesresponse[0][0][response]
+						}
+					} else {
+						var createOptions = {
+							vdc_code: response,
+							district : req.collects.district,
+							count: beneficiariesresponse[0][0][response]
+						}
+					}
+
+					countPromises.push(countPromiseGenerator(createOptions));
+
+				}
+
+
+
+				return Promise.all(countPromises);
+
+			})
+
+			.then(function(allstats) {
+				return res.json({
+					success: 1,
+					message: 'Beneficiaries count created successfully'
+				})
+			})
+
+			.catch(function(err) {
+				return res.json({
+					success: 0,
+					error: 1,
+					message: err
+				})
+			})
 
 
 	}
