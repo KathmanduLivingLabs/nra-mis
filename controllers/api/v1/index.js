@@ -74,9 +74,9 @@ module.exports = (router) => {
 	    * @apiVersion 1.0.0
 	    */
 
-	router.get('/api/v1/mis/region/records', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.allregionStats);
+	router.get('/api/v1/mis/region/records', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.getNumericalInsights);
 
-	router.get('/api/v1/mis/region/records/try', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.getNumericalInsights);
+	// router.get('/api/v1/mis/region/records/try', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.getNumericalInsights);
 
 
 	router.post('/api/v1/mis/numericalstats/create', recordsFn.collect, recordsFn.createNumericalStats);
