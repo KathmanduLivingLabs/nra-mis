@@ -76,6 +76,11 @@ module.exports = (router) => {
 
 	router.get('/api/v1/mis/region/records', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.allregionStats);
 
+	router.get('/api/v1/mis/region/records/try', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.getNumericalInsights);
+
+
+	router.post('/api/v1/mis/numericalstats/create', recordsFn.collect, recordsFn.createNumericalStats);
+
 	router.get('/api/v1/mis/records', recordsFn.initialStats);
 
 

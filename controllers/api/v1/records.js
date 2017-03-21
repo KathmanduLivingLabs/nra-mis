@@ -808,6 +808,324 @@ module.exports = {
 
 		}
 
+	},
+
+
+	createNumericalStats : function(req,res,next){
+
+		var regionOption = req.collects;
+
+		function numericalStatPromiseGenerator(recordsqueryOptions, regionOption) {
+
+			return new Promise(function(resolve, reject) {
+
+				dbInstance.sequelize.query(queryGen.extrapolate(recordsqueryOptions, regionOption))
+					.then(function(response) {
+						resolve({
+							obj: response,
+							title: recordsqueryOptions.title
+						});
+					})
+					.catch(function(err) {
+						reject(err);
+					})
+			})
+
+
+
+		}
+
+		var calculateStatsFor = [{
+				"join": {
+					table: 'house_statuses',
+					on: 'status',
+					value: '1'
+				},
+				"title": {
+					heading: "construction",
+					subtitle: "completed"
+				}
+			}, {
+				"join": {
+					table: 'house_statuses',
+					on: 'status',
+					value: '2'
+				},
+				"title": {
+					heading: "construction",
+					subtitle: "inprogress"
+				}
+			}, {
+				"join": {
+					table: 'house_statuses',
+					on: 'status',
+					value: '3'
+				},
+				"title": {
+					heading: "construction",
+					subtitle: "not_started"
+				}
+			},
+
+			{
+				"join": {
+					table: 'second_installments',
+					on: 'applied_for_second_installment',
+					value: '1'
+				},
+				"title": {
+					heading: "second_installment",
+					subtitle: "applied"
+				}
+			},
+
+			{
+				"join": {
+					table: 'second_installments',
+					on: 'applied_for_second_installment',
+					value: '2'
+				},
+				"title": {
+					heading: "second_installment",
+					subtitle: "not_applied"
+				}
+			},
+
+			{
+				"join": {
+					table: 'grant_receiveds',
+					on: 'grant_received',
+					value: '1'
+				},
+				"title": {
+					heading: "grant",
+					subtitle: "received"
+				}
+			},
+
+			{
+				"join": {
+					table: 'grant_receiveds',
+					on: 'grant_received',
+					value: '2'
+				},
+				"title": {
+					heading: "grant",
+					subtitle: "not_received"
+				}
+			},
+
+
+
+		];
+
+		var numericalStatsPromises = [];
+
+		calculateStatsFor.forEach(function(calculate) {
+			numericalStatsPromises.push(numericalStatPromiseGenerator(calculate, regionOption));
+		})
+
+		return Promise.all(numericalStatsPromises)
+
+
+
+		.then(function(allresponses) {
+
+			// console.log('ALLL$$$$',allresponses);
+
+
+			// console.log('****************',allresponses[0]);
+
+			// console.log('$$$$$$$$$$$',allresponses[0].obj);
+
+			var operationLevel = !req.collects.district ? 'district' : 'vdc';
+
+			function statPromiseGenerator(options){
+
+				var model = operationLevel === 'district' ? district_stats : vdc_stats;
+
+				return new Promise(function(resolve,reject){
+
+					if(operationLevel === 'district'){
+						var whereOptions = {
+							district_code: options.district_code,
+							heading: options.heading,
+							subtitle: options.subtitle
+						}
+
+					}else{
+						var whereOptions = {
+							vdc_code: options.vdc_code,
+							district : options.district,
+							heading: options.heading,
+							subtitle: options.subtitle
+						}
+					}
+
+					
+
+					 model.findAll({
+						where : whereOptions
+					})
+					.then(function(res){
+						if(res && res.length){
+							model.update({stat:options.stat},{where : whereOptions}).
+								then(function(updated){
+									resolve(updated)
+								})
+								.catch(function(err){
+									reject(err);
+								})
+						}else{
+							 model.create(options)
+							 	.then(function(created){
+							 		resolve(created);
+							 	})
+							 	.catch(function(err){
+							 		reject(err);
+							 	})
+						}
+					})
+					.catch(function(err){
+						reject(err);
+					})
+					
+
+				})
+
+				
+			}
+
+			var statPromises = [];
+
+			allresponses.forEach(function(response){
+
+				for (var region in response.obj[0][0]) {
+
+					if(operationLevel === 'district'){
+						var createOptions = {
+							district_code : region,
+							heading : response.title.heading ,
+							subtitle : response.title.subtitle , 
+							stat : response.obj[0][0][region]
+						}
+					}else{
+						var createOptions = {
+							vdc_code : region,
+							district : req.collects.district,
+							heading : response.title.heading ,
+							subtitle : response.title.subtitle , 
+							stat : response.obj[0][0][region]
+						}
+					}
+					
+					
+
+					statPromises.push(statPromiseGenerator(createOptions));
+
+				}
+
+			})
+
+			return Promise.all(statPromises);
+
+
+		})
+
+		.then(function(allstats){
+			return res.json({
+				success : 1,
+				message : 'numericalStats created successfully'
+			})
+		})
+
+		.catch(function(err) {
+			return res.json({
+				success: 0,
+				error: 1,
+				message: err
+			})
+		})
+
+	},
+
+
+	getNumericalInsights : function(req,res,next){
+
+		var operationLevel = !req.collects.district ? 'district' : 'vdc';
+
+		var model = operationLevel === 'district' ? district_stats : vdc_stats;
+
+		var whereOptions = operationLevel === 'vdc' ? { district : req.collects.district} : {}
+
+		model.findAll({where : whereOptions})
+			.then(function(districtStats){
+
+				var region = {};
+
+				var onCode = operationLevel === 'district' ? 'district_code' : 'vdc_code'
+
+				districtStats.forEach(function(districtStat){
+					if(!region[districtStat[onCode]]){
+						region[districtStat[onCode]] = {};
+					}
+
+					if(!region[districtStat[onCode]][districtStat.heading]){
+						region[districtStat[onCode]][districtStat.heading] = {}
+					}
+
+					region[districtStat[onCode]][districtStat.heading][districtStat.subtitle] = districtStat.stat
+
+				})
+
+				var ns = region ; 
+
+				if(req.collects.district){
+					for(var stat in ns){
+						var tempvalue = ns[stat];
+						var statstring = 'vdc$'+formatVdc.unformat(stat.split('$')[1]);
+						ns[statstring] = tempvalue;
+						delete ns[stat];
+					}
+				}
+
+
+				for (var stat in req.beneficiariesStats) {
+					if (ns[stat]) {
+						if (!ns[stat]['beneficiaries']) {
+							ns[stat]['beneficiaries'] = {};
+						}
+
+						ns[stat]['beneficiaries']['total'] = req.beneficiariesStats[stat];
+						ns[stat]['beneficiaries']['surveyed'] = req.vdcStats[stat];
+
+					}
+				}
+
+				
+				for (var region in ns) {
+
+					var regionCode = region.split('$')[1].toString();
+					if (req.collects.district) {
+						regionCode = Number(regionCode.slice(req.collects.district.length, regionCode.length)).toString();
+					}
+					if (req.regionCodes[regionCode]) {
+
+						var tempvalue = ns[region];
+						delete ns[region];
+						ns[req.regionCodes[regionCode] + '$' + region.split('$')[1]] = tempvalue;
+					}
+
+				}
+
+				req.finalApiResponse.numericalStats = Object.assign(req.finalApiResponse.numericalStats, ns);
+
+
+				return res.json(req.finalApiResponse);
+
+				
+			})
+
 	}
 
 }
