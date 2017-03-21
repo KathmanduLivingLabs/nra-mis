@@ -69,18 +69,60 @@ module.exports = {
 
 	},
 
+	regularImport : function(req,res,next){
+
+		dbInstance.sequelize.query('select count(*)  from records')
+			.then(function(currentRecords){
+
+
+				var count  = currentRecords[0][0].count;
+				console.log('currentRecords',count)
+
+				var request = require('request');
+
+				var requestOptions = config.ona.fetch;
+
+				requestOptions.qs = {
+					start: Number(count) ,
+					limit: 10
+				}
+
+				console.log('requestOptions',requestOptions.method);
+
+				request(config.ona.fetch,function(err,response){
+					if(err){
+						return res.json({
+							success : 0 ,
+							message : err
+						})
+					}
+					// console.log('respose',response.body)
+					req.onarecords = typeof response.body === 'object' ? response.body : JSON.parse(response.body);
+					next();
+				})
+
+
+			})
+			.catch(function(err){
+				return res.json({
+					success : 0,
+					message  : err
+				})
+			})
+
+	},
+
 	import: function(req, res, next) {
 
-		if (!data) {
+		if (!req.onarecords && !data ) {
 			return res.json({
 				success: 0,
 				error: 1,
-				message: 'No data file !'
+				message: 'No data to insert !'
 			})
 		}
 
-		var recordsData = data;
-
+		var recordsData = req.onarecords || data  ;
 
 		var metaPromises = [];
 
