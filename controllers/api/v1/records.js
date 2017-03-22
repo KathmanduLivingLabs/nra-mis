@@ -141,7 +141,7 @@ module.exports = {
 			var beneficiariesCountModel = !regionOption.district ? district_beneficiaries : vdc_beneficiaries;
 
 			var beneficiariesCountOptions = {
-				where : !regionOption.district ?  {} : { 'district' : regionOption.district }
+				where : !regionOption.district ?  {} :  !regionOption.vdc ?   { 'district' : regionOption.district } : { 'district' : regionOption.district,'vdc_code' : 'vdc$'+formatVdc.unformat(regionOption.vdc) }
 			}
 
 			return beneficiariesCountModel.findAll(beneficiariesCountOptions);

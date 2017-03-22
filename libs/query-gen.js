@@ -137,6 +137,52 @@ module.exports = {
 
 
 
+	},
+
+	houseDesign : function(queryOptions,regionOption){
+
+		switch(regionOption.assessmentId){
+
+			case "1":
+
+				var query = "SELECT count(CASE WHEN house_statuses.house_design_followed='1' THEN 1 END) as \"Prototype Design (NRA Catalog)\", count(CASE WHEN  house_statuses.house_design_followed='2' THEN 1 END) as \"Old traditional design (non engineered)\", count(CASE WHEN  house_statuses.house_design_followed='3' THEN 1 END) as \"Technical Support from Architect/Engineer (engineered)\", count(CASE WHEN  house_statuses.house_design_followed='4' THEN 1 END) as \"Building code norms followed without engineer\", 	count(CASE WHEN  house_statuses.house_design_followed='5' THEN 1 END) as \"Other\"  	FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id where house_statuses.status='"+queryOptions.status+"'";
+
+				break;
+
+			case "2":
+
+				var query = "SELECT count(CASE WHEN house_statuses.building_foundation='1' THEN 1 END) as \"Brick mud mortar\", count(CASE WHEN  house_statuses.building_foundation='2' THEN 1 END) as \"Brick cement mortar\", count(CASE WHEN  house_statuses.building_foundation='3' THEN 1 END) as \"Stone mud mortar\", count(CASE WHEN  house_statuses.building_foundation='4' THEN 1 END) as \"Stone cement mortar\", 	count(CASE WHEN  house_statuses.building_foundation='5' THEN 1 END) as \"RC frame\", 	count(CASE WHEN  house_statuses.building_foundation='6' THEN 1 END) as \"Other\"  	FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id where house_statuses.status='"+queryOptions.status+"'";
+				break;
+
+			case "3":
+
+				var query = "SELECT count(CASE WHEN superstructures.structure='1' THEN 1 END) as \"Adobe/Mud construction\", count(CASE WHEN  superstructures.structure='2' THEN 1 END) as \"Mortar-less stones (stacked stones)\", count(CASE WHEN  superstructures.structure='3' THEN 1 END) as \"Stone in mud mortar\",	count(CASE WHEN  superstructures.structure='4' THEN 1 END) as \"Stone in cement mortar\" ,	count(CASE WHEN  superstructures.structure='5' THEN 1 END) as \"Brick in mud mortar\" ,	count(CASE WHEN  superstructures.structure='6' THEN 1 END) as \"Brick in cement mortar\" ,	count(CASE WHEN  superstructures.structure='7' THEN 1 END) as \"Wood\" ,	count(CASE WHEN  superstructures.structure='8' THEN 1 END) as \"Bamboo\" ,	count(CASE WHEN  superstructures.structure='9' THEN 1 END) as \"RC frame\" ,	count(CASE WHEN  superstructures.structure='10' THEN 1 END) as \"Other\"  	FROM records INNER JOIN superstructures ON records.id = superstructures.record_id INNER JOIN house_statuses ON records.id=house_statuses.record_id where house_statuses.status='"+queryOptions.status+"'";
+				break;
+
+
+			case "4":
+
+				var query = "SELECT count(CASE WHEN house_statuses.roof_design='1' THEN 1 END) as \"CGI sheet\", count(CASE WHEN  house_statuses.roof_design='2' THEN 1 END) as \"RCC roof\", count(CASE WHEN  house_statuses.roof_design='3' THEN 1 END) as \"Traditional roof/tile/slate\",	count(CASE WHEN  house_statuses.roof_design='4' THEN 1 END) as \"Other\"  	FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id where house_statuses.status='"+queryOptions.status+"'";
+				break;
+
+
+
+			default:
+
+
+		}
+
+		
+
+		if (regionOption.district) {
+			query = query + " AND records.district='" + regionOption.district + "' ";
+
+			if (regionOption.vdc) {
+				query = query + " AND  records.vdc='" + regionOption.vdc + "'";
+			}
+		}
+
+		return query;
 	}
 
 }

@@ -1,5 +1,6 @@
 var importFn = require('./import');
 var recordsFn = require('./records');
+var assessmentFn = require('./assesment');
 
 
 module.exports = (router) => {
@@ -87,6 +88,35 @@ module.exports = (router) => {
 	router.post('/api/v1/mis/count/beneficiaries/create', recordsFn.collect, recordsFn.creteBeneficiariesCount);
 
 	router.get('/api/v1/mis/records', recordsFn.initialStats);
+
+
+	/**
+	    * @api {get} /api/v1/mis/assessment/queries  Assessment  
+	    * @apiName Assessment
+	    * @apiGroup Fetch
+		*
+		*
+		* @apiParam {Varchar} district District code for the region
+		* @apiParam {Varchar} vdc VDC code for the region
+		* @apiParam {Varchar} assessmentId Assessment query ID
+
+		* @apiSuccessExample {json} Parameters Format
+		*						{
+		*							"district":"30",
+		*							"vdc" : "30013",
+		*							"assessmentId" : "1",
+		*						}
+		* @apiSuccess {Integer} success Success status
+		* @apiSuccess {String} message Success message
+	    * @apiSuccess {Object[]} stats Stats Object
+	    * @apiSuccess {Object[]} percentageStats Percentage Stats Object
+	    
+	    * @apiDescription API that fetch regional stats
+	    * @apiVersion 1.0.0
+	    */
+
+
+	router.get('/api/v1/mis/assessment/queries',assessmentFn.collect,assessmentFn.queries);
 
 
 }
