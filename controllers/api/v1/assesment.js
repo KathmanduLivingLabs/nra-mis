@@ -10,7 +10,7 @@ module.exports = {
 
 		req.collects = {};
 
-		var fields = ['district', 'vdc','assessmentId'];
+		var fields = ['district', 'vdc','assessmentId','type'];
 
 		fields.forEach((field) => {
 			if (typeof req.body[field] !== 'undefined' || typeof req.query[field] !== 'undefined') {
@@ -63,22 +63,39 @@ module.exports = {
 
 		}
 
+		if(!req.collects.type) req.collects.type = 'construction';
 
+		if(req.collects.type==='construction'){
+			var queryFor = [
+				{
+					status : '1',
+					title : 'completed'
+				},
+				{
+					status : '2',
+					title : 'progress'
+				},
+				{
+					status : '3',
+					title : 'not started'
+				}
+			]
 
-		var queryFor = [
-			{
-				status : '1',
-				title : 'construction completed'
-			},
-			{
-				status : '2',
-				title : 'construction in progress'
-			},
-			{
-				status : '3',
-				title : 'not started'
-			}
-		]
+		}else if(req.collects.type==='installment') {
+			var queryFor = [
+				{
+					status : '1',
+					title : 'applied'
+				},
+				{
+					status : '2',
+					title : 'not applied'
+				}
+				
+			]
+
+		}
+		
 
 		var queryPromises = [];
 

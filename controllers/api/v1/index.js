@@ -99,12 +99,14 @@ module.exports = (router) => {
 		* @apiParam {Varchar} district District code for the region
 		* @apiParam {Varchar} vdc VDC code for the region
 		* @apiParam {Varchar} assessmentId Assessment query ID
+		* @apiParam {Varchar} type Assessment type : Construction or Installment
 
 		* @apiSuccessExample {json} Parameters Format
 		*						{
 		*							"district":"30",
 		*							"vdc" : "30013",
 		*							"assessmentId" : "1",
+		*							"type" : "construction" or installment // defaults to construction
 		*						}
 		* @apiSuccess {Integer} success Success status
 		* @apiSuccess {String} message Success message
