@@ -175,6 +175,16 @@ module.exports = {
 
 				case "6":
 
+					var query = "SELECT count(CASE WHEN house_statuses.building_code_followed='1' THEN 1 END) as \"Yes\", count(CASE WHEN  house_statuses.building_code_followed='2' THEN 1 END) as \"No\"	FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id where house_statuses.status='" + queryOptions.status + "'";
+					break;
+
+				case "7":
+
+					var query = "SELECT count(CASE WHEN house_statuses.code_not_followed='1' THEN 1 END) as \"Don’t know how to do it\", count(CASE WHEN  house_statuses.code_not_followed='2' THEN 1 END) as \"Too expensive\", count(CASE WHEN  house_statuses.code_not_followed='3' THEN 1 END) as \"Lack of trained masons\", count(CASE WHEN  house_statuses.code_not_followed='4' THEN 1 END) as \"Don’t care\", count(CASE WHEN  house_statuses.code_not_followed='5' THEN 1 END) as \"Other\"	FROM records INNER JOIN house_statuses ON records.id = house_statuses.record_id where house_statuses.status='" + queryOptions.status + "'";
+					break;
+
+				case "8":
+
 					var query = "SELECT count(CASE WHEN construction_not_starteds.construction_not_started='1' THEN 1 END) as \"Displaced by earthquake\",count(CASE WHEN construction_not_starteds.construction_not_started='2' THEN 1 END) as \"Delay in receiving government grant\",count(CASE WHEN construction_not_starteds.construction_not_started='3' THEN 1 END) as \"Lack of technical knowledge\",count(CASE WHEN construction_not_starteds.construction_not_started='4' THEN 1 END) as \"Lack of construction materials\",count(CASE WHEN construction_not_starteds.construction_not_started='5' THEN 1 END) as \"Lack of human resource (eg: mason/carpenter/plumber)\",count(CASE WHEN construction_not_starteds.construction_not_started='6' THEN 1 END) as \"Land ownership problem\",count(CASE WHEN construction_not_starteds.construction_not_started='7' THEN 1 END) as \"Absence of  household member to oversee construction\",count(CASE WHEN construction_not_starteds.construction_not_started='8' THEN 1 END) as \"Other\"	FROM records  INNER JOIN construction_not_starteds ON construction_not_starteds.record_id = records.id  INNER JOIN house_statuses ON records.id = house_statuses.record_id where house_statuses.status='" + queryOptions.status + "'";
 					break;
 
