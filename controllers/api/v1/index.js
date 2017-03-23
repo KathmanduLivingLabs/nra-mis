@@ -8,7 +8,7 @@ module.exports = (router) => {
 	router.post('/api/v1/mis/import', importFn.authorize, importFn.import);
 
 
-	// router.post('/api/v1/mis/regular/import', importFn.authorize, importFn.regularImport,importFn.import);
+	router.post('/api/v1/mis/regular/import', importFn.authorize ,importFn.regularImport,importFn.import,recordsFn.creteStatCountAfterOna);
 
 	router.post('/api/v1/mis/beneficiaries/create', importFn.authorize, importFn.beneficiariesCreate);
 

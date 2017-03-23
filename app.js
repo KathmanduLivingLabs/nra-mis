@@ -9,8 +9,17 @@ var bodyParser = require('body-parser');
 
 var app = express();
 
-// var cronJob = require('./cron');
-// cronJob.start();
+// try {
+//   // var cronJob = require('./cron');
+//   // cronJob.start(); //start cron job
+// }
+
+// catch(e){
+//   console.log(e);
+// }
+
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
