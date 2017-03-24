@@ -1,5 +1,5 @@
 try {
-	var data = require('../../../data/data.json');
+	var data = require('../../../data/data_march24_day.json');
 } catch (e) {
 	console.log(e);
 }
@@ -102,7 +102,16 @@ module.exports = {
 					}
 					req.onarecords = typeof response.body === 'object' ? response.body : JSON.parse(response.body);
 
-					next();
+					if(req.onarecords && req.onarecords.length){
+						return next();
+						
+					}else{
+						return res.json({
+							success : 1,
+							message : 'Records are up-to-date !'
+						})
+					}
+
 				})
 
 
@@ -173,7 +182,7 @@ module.exports = {
 
 			return records.findAll({
 					where: {
-						ona_record_id: recordsOptions.ona_record_id.toString()
+						hh_key: recordsOptions.hh_key
 					}
 				})
 				.then(function(recordexits) {
@@ -383,35 +392,61 @@ module.exports = {
 		}
 
 
-		recordsData.forEach(function(record, index) {
-			metaPromises.push(metaPromiseGenerator(record, index));
-		})
+		var filteredData = [];
+		var hhkeyTracker = [];
 
+		for(var rd = recordsData.length-1;rd>=0;rd--){
+			var record = recordsData[rd];
+			if(hhkeyTracker.indexOf(record['g1/g1_b/hh_key']) === -1){
+				filteredData.push(record);
+				hhkeyTracker.push(record['g1/g1_b/hh_key']);
+			}
+		}
 
-		return Promise.all(metaPromises)
-			.then(function(result) {
-				if (result) {
+		// var filteredData = recordsData;
 
-					if (req.onarecords && req.onarecords.length) {
-						return next();
+		if(filteredData && filteredData.length){
+			filteredData.forEach(function(record, index) {
+				metaPromises.push(metaPromiseGenerator(record, index));
+			});
+
+			return Promise.all(metaPromises)
+				.then(function(result) {
+					if (result) {
+
+						if (req.onarecords && req.onarecords.length) {
+							return next();
+						}
+
+						return res.json({
+							success: 1,
+							message: "Record created successfully !"
+						})
 					}
 
-					return res.json({
-						success: 1,
-						message: "Record created successfully !"
-					})
-				}
-
-			})
-			.catch(function(err) {
-
-				return res.json({
-					success: 0,
-					error: 1,
-					message: err
 				})
+				.catch(function(err) {
 
+					return res.json({
+						success: 0,
+						error: 1,
+						message: err
+					})
+
+				})
+		}else{
+
+			return res.json({
+				success: 1,
+				message: "Records are up-to-date !"
 			})
+
+		}
+
+		
+
+
+		
 
 
 
