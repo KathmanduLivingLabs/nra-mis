@@ -14,6 +14,16 @@ module.exports = function(sequelize,DataTypes){
             allowNull : true
         },
 
+        start : {
+            type : DataTypes.DATE,
+            allowNull : true
+        },
+
+        end : {
+            type : DataTypes.DATE,
+            allowNull : true
+        },
+
         submission_time : {
             type : DataTypes.DATE,
             allowNull : true
@@ -70,7 +80,7 @@ module.exports = function(sequelize,DataTypes){
         },
 
         final_recommendations : {
-            type : DataTypes.STRING,
+            type : DataTypes.TEXT,
             allowNull : true
         },
 

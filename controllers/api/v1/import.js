@@ -16,6 +16,8 @@ var appRootPath = require('app-root-path');
 
 var request = require('request');
 
+var updateRecord = require('./updaterecord');
+
 function allPromisesGenerator(on, columnname, option, concernedEntities, t) {
 
 	var promises = [];
@@ -81,7 +83,7 @@ module.exports = {
 
 				var onaUrl = config.ona.fetch.url;
 				var limitRecords = config.ona.limit;
-				onaUrl = onaUrl + '?query={"_submission_time":{"$gt":"' + count + '"}}&limit=' + limitRecords;
+				onaUrl = onaUrl + '?query={"_submission_time":{"$gte":"' + count + '"}}&limit=' + limitRecords;
 
 
 				var requestOptions = {
@@ -148,6 +150,8 @@ module.exports = {
 			var recordsOptions = {
 				hh_key: record["g1/g1_b/hh_key"],
 				ona_record_id: record['_id'],
+				start : record['start'],
+				end : record['end'],
 				submission_time: record['_submission_time'],
 				district: record['g1/g1_a/district'],
 				vdc: record['g1/g1_b/vdc'],
@@ -182,12 +186,13 @@ module.exports = {
 
 			return records.findAll({
 					where: {
-						hh_key: recordsOptions.hh_key
+						ona_record_id: recordsOptions.ona_record_id.toString()
 					}
 				})
 				.then(function(recordexits) {
 					if (recordexits && recordexits.length) {
 						return true;
+						// return updateRecord.update(record,recordexits[0].id);
 					} else {
 
 						return dbInstance.sequelize.transaction(function(t) {
@@ -395,15 +400,25 @@ module.exports = {
 		var filteredData = [];
 		var hhkeyTracker = [];
 
-		for(var rd = recordsData.length-1;rd>=0;rd--){
-			var record = recordsData[rd];
-			if(hhkeyTracker.indexOf(record['g1/g1_b/hh_key']) === -1){
-				filteredData.push(record);
-				hhkeyTracker.push(record['g1/g1_b/hh_key']);
-			}
-		}
+		// recordsData.forEach(function(recordData){
+		// 	console.log('1',new Date(recordData.start).getTime());
+		// 	console.log('2',new Date(config.surveryConsideredTime).getTime())
+		// 	if(new Date(recordData.start).getTime()>new Date(config.surveryConsideredTime).getTime()){
+		// 		filteredData.push(recordData);
+		// 	}
+		// })
 
-		// var filteredData = recordsData;
+		// console.log('*********',filteredData)
+
+		// for(var rd = recordsData.length-1;rd>=0;rd--){
+		// 	var record = recordsData[rd];
+		// 	if(hhkeyTracker.indexOf(record['g1/g1_b/hh_key']) === -1){
+		// 		filteredData.push(record);
+		// 		hhkeyTracker.push(record['g1/g1_b/hh_key']);
+		// 	}
+		// }
+
+		var filteredData = recordsData;
 
 		if(filteredData && filteredData.length){
 			filteredData.forEach(function(record, index) {
