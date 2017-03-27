@@ -11,12 +11,12 @@ module.exports = function(sequelize,DataTypes){
 
         status : {
             type : DataTypes.STRING,
-            allowNull : false
+            allowNull : true
         },
 
         cost : {
             type : DataTypes.STRING,
-            allowNull : false
+            allowNull : true
         },
 
         house_design_followed : {

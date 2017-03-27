@@ -87,7 +87,7 @@ module.exports = (router) => {
 
 	router.post('/api/v1/mis/count/beneficiaries/create', recordsFn.collect, recordsFn.creteBeneficiariesCount);
 
-	router.get('/api/v1/mis/records', recordsFn.initialStats);
+	// router.get('/api/v1/mis/records', recordsFn.initialStats);
 
 
 	/**

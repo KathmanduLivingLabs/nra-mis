@@ -15,13 +15,15 @@ module.exports = {
 		}
 		query = query + " FROM  " + queryOptions.table;
 
-		if (queryOptions.where) {
+		query = query + " WHERE records.is_deleted=false";
 
-			for (var filter in queryOptions.where) {
+		// if (queryOptions.where) {
 
-			}
+		// 	for (var filter in queryOptions.where) {
 
-		}
+		// 	}
+
+		// }
 
 		return query;
 
@@ -50,6 +52,8 @@ module.exports = {
 
 		query = query + " FROM  records " + " INNER JOIN " + queryOptions.join.table + " ON " + queryOptions.join.table + ".record_id=records.id ";
 
+		query = query + " WHERE records.is_deleted=false";
+
 		return query;
 
 
@@ -74,8 +78,11 @@ module.exports = {
 
 			if (regionOption.vdc) {
 				query = query + " WHERE vdc='" + regionOption.vdc + "'";
-
+				query = query + " AND records.is_deleted=false";
+			}else{
+				query = query + " WHERE records.is_deleted=false";
 			}
+
 
 			return query;
 
@@ -228,6 +235,8 @@ module.exports = {
 				query = query + " AND  records.vdc='" + regionOption.vdc + "'";
 			}
 		}
+
+		query = query + " AND records.is_deleted=false";
 
 		// console.log('**********************&&^^',query)
 

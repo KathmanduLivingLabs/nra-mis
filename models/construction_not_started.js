@@ -11,7 +11,7 @@ module.exports = function(sequelize,DataTypes){
 
         construction_not_started : {
             type : DataTypes.STRING,
-            allowNull : false
+            allowNull : true
         },
 
         specify : {

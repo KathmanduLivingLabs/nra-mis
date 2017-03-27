@@ -11,7 +11,7 @@ module.exports = function(sequelize,DataTypes){
 
         structure : {
             type : DataTypes.STRING,
-            allowNull : false
+            allowNull : true
         },
 
         specify : {

@@ -11,7 +11,7 @@ module.exports = function(sequelize,DataTypes){
 
         priority : {
             type : DataTypes.STRING,
-            allowNull : false
+            allowNull : true
         }
 
 

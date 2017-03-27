@@ -137,6 +137,11 @@ module.exports = function(sequelize,DataTypes){
         specify_primary_livelyhood : {
             type : DataTypes.STRING,
             allowNull : true
+        },
+
+        is_deleted : {
+            type : DataTypes.BOOLEAN,
+            defaultValue : false
         }
 
 

@@ -11,7 +11,7 @@ module.exports = function(sequelize,DataTypes){
 
         grant_received : {
             type : DataTypes.STRING,
-            allowNull : false
+            allowNull : true
         },
 
         grant_spend_on : {

@@ -12,7 +12,7 @@ module.exports = function(sequelize,DataTypes){
 
         applied_for_second_installment : {
             type : DataTypes.STRING,
-            allowNull : false
+            allowNull : true
         },
 
         how_long_since_applied : {
