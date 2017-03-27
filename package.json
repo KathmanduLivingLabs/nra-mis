@@ -24,6 +24,7 @@
     "request": "^2.81.0",
     "sequelize": "^3.30.2",
     "serve-favicon": "~2.3.0",
+    "winston": "^2.3.1",
     "xlsx": "^0.9.3"
   }
 }

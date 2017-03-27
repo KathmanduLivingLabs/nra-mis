@@ -1,6 +1,6 @@
 var config = require('../../../config');
-
 var dbInstance = require('../../../models');
+var moment = require('moment');
 
 function allPromisesGenerator(on, columnname, option, concernedEntities, t) {
 
@@ -50,6 +50,8 @@ module.exports = {
 		var recordsOptions = {
 			hh_key: record["g1/g1_b/hh_key"],
 			ona_record_id: record['_id'],
+			start : moment(record['start']),
+			end : moment(record['end']),
 			submission_time: record['_submission_time'],
 			district: record['g1/g1_a/district'],
 			vdc: record['g1/g1_b/vdc'],

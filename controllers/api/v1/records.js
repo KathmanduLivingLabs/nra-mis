@@ -332,6 +332,7 @@ module.exports = {
 
 
 		.catch(function(err) {
+			if(err) winstonLogger.log('info',err);
 			return res.json({
 				success: 0,
 				error: 1,
@@ -610,6 +611,7 @@ module.exports = {
 
 				})
 				.catch(function(err) {
+					if(err) winstonLogger.log('info',err);
 					return res.json({
 						success: 0,
 						message: err
@@ -829,6 +831,7 @@ module.exports = {
 			})
 
 			.catch(function(err) {
+				if(err) winstonLogger.log('info',err);
 				return res.json({
 					success: 0,
 					error: 1,
@@ -861,6 +864,7 @@ module.exports = {
 		})
 
 		.catch(function(err) {
+			if(err) winstonLogger.log('info',err);
 			return res.json({
 				success: 0,
 				error: 1,
@@ -1084,6 +1088,7 @@ module.exports = {
 		})
 
 		.catch(function(err) {
+			if(err) winstonLogger.log('info',err);
 			return res.json({
 				success: 0,
 				error: 1,
@@ -1126,6 +1131,7 @@ module.exports = {
 				})
 			})
 			.catch(function(err) {
+				if(err) winstonLogger.log('info',err);
 				return res.json({
 					success: 0,
 					error: 1,

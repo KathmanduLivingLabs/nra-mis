@@ -1,5 +1,5 @@
 try {
-	var data = require('../../../data/data_march24_day.json');
+	var data = require('../../../data/try.json');
 } catch (e) {
 	console.log(e);
 }
@@ -99,6 +99,7 @@ module.exports = {
 
 				request(requestOptions, function(err, response) {
 					if (err) {
+						if(err) winstonLogger.log('info',err);
 						return res.json({
 							success: 0,
 							message: err
@@ -121,6 +122,7 @@ module.exports = {
 
 			})
 			.catch(function(err) {
+				if(err) winstonLogger.log('info',err);
 				return res.json({
 					success: 0,
 					message: err
@@ -443,7 +445,7 @@ module.exports = {
 
 				})
 				.catch(function(err) {
-
+					if(err) winstonLogger.log('info',err);
 					return res.json({
 						success: 0,
 						error: 1,
@@ -541,7 +543,7 @@ module.exports = {
 
 			})
 			.catch(function(err) {
-
+				if(err) winstonLogger.log('info',err);
 				return res.json({
 					success: 0,
 					error: 1,
