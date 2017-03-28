@@ -414,13 +414,20 @@ module.exports = {
 
 		// console.log('*********',filteredData)
 
-		for(var rd = recordsData.length-1;rd>=0;rd--){
-			var record = recordsData[rd];
-			if(hhkeyTracker.indexOf(record['ona_record_id']) === -1){
+		// for(var rd = recordsData.length-1;rd>=0;rd--){
+		// 	var record = recordsData[rd];
+		// 	if(hhkeyTracker.indexOf(record['ona_record_id']) === -1){
+		// 		filteredData.push(record);
+		// 		hhkeyTracker.push(record['ona_record_id']);
+		// 	}
+		// }
+
+		recordsData.forEach(function(record){
+			if(hhkeyTracker.indexOf(record['_id']) === -1){
 				filteredData.push(record);
-				hhkeyTracker.push(record['ona_record_id']);
+				hhkeyTracker.push(record['_id']);
 			}
-		}
+		})
 
 		// var filteredData = recordsData;
 

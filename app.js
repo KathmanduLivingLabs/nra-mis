@@ -9,19 +9,19 @@ var bodyParser = require('body-parser');
 
 var app = express();
 
-try {
-  var cronJob = require('./cron');
+// try {
+//   var cronJob = require('./cron');
 
-  if(!cronJob.running){
+//   if(!cronJob.running){
     
-    cronJob.start(); //start cron job
-  }
+//     cronJob.start(); //start cron job
+//   }
 
-}
+// }
 
-catch(e){
-  console.log(e);
-}
+// catch(e){
+//   console.log(e);
+// }
 
 
 
@@ -60,7 +60,7 @@ for(var version in versions){
     require('./controllers'+ versions[version])(router);    
 }
 
-// global['winstonLogger'] = require('./winston-config');
+global['winstonLogger'] = require('./winston-config');
 
 
 // catch 404 and forward to error handler

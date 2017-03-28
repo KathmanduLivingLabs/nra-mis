@@ -1,6 +1,7 @@
 var importFn = require('./import');
 var recordsFn = require('./records');
 var assessmentFn = require('./assesment');
+var statisticsFn = require('./statistics');
 
 
 module.exports = (router) => {
@@ -119,6 +120,9 @@ module.exports = (router) => {
 
 
 	router.get('/api/v1/mis/assessment/queries',assessmentFn.collect,assessmentFn.queries);
+
+
+	router.get('/api/v1/mis/statistics/submission/daily',statisticsFn.dailySubmission);
 
 
 }
