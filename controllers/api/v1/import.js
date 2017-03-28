@@ -1,5 +1,5 @@
 try {
-	var data = require('../../../data/try.json');
+	var data = require('../../../data/data.json');
 } catch (e) {
 	console.log(e);
 }
