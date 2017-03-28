@@ -9,14 +9,19 @@ var bodyParser = require('body-parser');
 
 var app = express();
 
-// try {
-//   var cronJob = require('./cron');
-//   cronJob.start(); //start cron job
-// }
+try {
+  var cronJob = require('./cron');
 
-// catch(e){
-//   console.log(e);
-// }
+  if(!cronJob.running){
+    
+    cronJob.start(); //start cron job
+  }
+
+}
+
+catch(e){
+  console.log(e);
+}
 
 
 
