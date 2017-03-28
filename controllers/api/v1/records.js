@@ -45,6 +45,32 @@ module.exports = {
 
 	},
 
+	updateStatus : function(req,res,next){
+
+		var updateInfo = {};
+
+		var queryLastupdate = "select  * from records where id in (select max(id) from records)";
+
+		dbInstance.sequelize.query(queryLastupdate)
+			.then(function(lastupdate) {
+				updateInfo.lastUpdate = lastupdate[0][0].createdAt;
+				var queryLastSubmission = "select max(submission_time) as last_submission from records";
+				return	dbInstance.sequelize.query(queryLastSubmission);
+			})
+			.then(function(lastsubmission){
+				updateInfo.lastSubmission = lastsubmission[0][0].last_submission;
+				req.updateInfo = updateInfo;
+				return next();
+			})
+			.catch(function(err) {
+				res.json({
+					success: 0,
+					message: err
+				})
+			})
+
+	},
+
 	stats: function(req, res, next) {
 
 		var regionOption = req.collects;
@@ -599,7 +625,7 @@ module.exports = {
 						regionNames[region[codeName]] = region[columnName];
 					})
 
-					console.log('@#!@#@!', regionNames)
+					// console.log('@#!@#@!', regionNames)
 
 					req.regionCodes = regionNames;
 
@@ -876,6 +902,8 @@ module.exports = {
 
 
 	getNumericalInsights: function(req, res, next) {
+
+		req.finalApiResponse['updateInfo'] = req.updateInfo;
 
 		if (req.collects.ns) {
 

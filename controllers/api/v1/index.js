@@ -79,7 +79,7 @@ module.exports = (router) => {
 	    * @apiVersion 1.0.0
 	    */
 
-	router.get('/api/v1/mis/region/records', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.getNumericalInsights);
+	router.get('/api/v1/mis/region/records', recordsFn.collect, recordsFn.updateStatus, recordsFn.stats, recordsFn.getRegionnames, recordsFn.getNumericalInsights);
 
 	// router.get('/api/v1/mis/region/records/try', recordsFn.collect, recordsFn.stats, recordsFn.getRegionnames, recordsFn.getNumericalInsights);
 
@@ -123,6 +123,8 @@ module.exports = (router) => {
 
 
 	router.get('/api/v1/mis/statistics/submission/daily',statisticsFn.dailySubmission);
+
+	// router.get('/api/v1/mis/test',statisticsFn.test);
 
 
 }
