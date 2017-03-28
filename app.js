@@ -55,7 +55,7 @@ for(var version in versions){
     require('./controllers'+ versions[version])(router);    
 }
 
-global['winstonLogger'] = require('./winston-config');
+// global['winstonLogger'] = require('./winston-config');
 
 
 // catch 404 and forward to error handler
