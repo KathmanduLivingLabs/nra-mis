@@ -77,15 +77,22 @@ module.exports = {
 
 	regularImport: function(req, res, next) {
 
-		dbInstance.sequelize.query('select id, cast(submission_time as text) as strdate from records where submission_time in  (select max(submission_time) from records)')
+		// var query = 'select id, cast(submission_time as text) as strdate from records where submission_time in  (select max(submission_time) from records)';
+		var query = 'select count(*) from records';
+
+		dbInstance.sequelize.query(query)
 			.then(function(currentRecords) {
 
-				var count = currentRecords[0][0].strdate.split('+')[0];
-				count = count.split(' ')[0] + 'T' + count.split(' ')[1];
+				var count = currentRecords[0][0].count;
+
+				// var count = currentRecords[0][0].strdate.split('+')[0];
+				// count = count.split(' ')[0] + 'T' + count.split(' ')[1];
 
 				var onaUrl = config.ona.fetch.url;
 				var limitRecords = config.ona.limit;
-				onaUrl = onaUrl + '?query={"_submission_time":{"$gte":"' + count + '"}}&limit=' + limitRecords;
+				// onaUrl = onaUrl + '?query={"_id":{"$gte":"' + count + '"}}&limit=' + limitRecords;
+				onaUrl = onaUrl + '?start=' + count + '&limit=' + limitRecords;
+
 
 
 				var requestOptions = {
