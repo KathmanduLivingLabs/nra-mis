@@ -123,6 +123,8 @@ module.exports = (router) => {
 
 	router.get('/api/v1/mis/statistics/submission/daily',statisticsFn.dailySubmission);
 
+	router.get('/api/v1/mis/statistics/records/info',statisticsFn.info);
+
 	// router.get('/api/v1/mis/test',statisticsFn.test);
 
 

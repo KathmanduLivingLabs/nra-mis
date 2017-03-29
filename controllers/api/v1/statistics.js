@@ -117,5 +117,25 @@ module.exports = {
 			})
 		
 
+	},
+
+	info : function(req,res,next){
+
+		var query = "select count(*) as all,count(distinct(ona_record_id)) as distinct from records";
+		dbInstance.sequelize.query(query)
+			.then(function(reply){
+				return res.json({
+					success : 1,
+					info : reply[0][0]
+				})
+			})
+			.catch(function(err){
+				return res.json({
+					success : 0,
+					message :err
+				})
+			})
+
+
 	}
 }
