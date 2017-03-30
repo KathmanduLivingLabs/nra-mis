@@ -77,6 +77,7 @@ module.exports = {
 
 		var regionStats = {};
 
+		// dbQuery = dbQuery + " AND records.is_deleted=false AND records.id IN (select distinct on(hh_key) records.id from records order by hh_key,records.id DESC)";
 		var dbQuery = "\
 			SELECT \
 			count(records.*) as surveys, \

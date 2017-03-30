@@ -32,25 +32,27 @@ module.exports = {
 	},
 
 
-	test : function(req,res,next){
-		
+	test: function(req, res, next) {
+
 		var checkDuplicatesOn = 'hh_key';
 
 		var query = `select id,${checkDuplicatesOn} from records where records.is_deleted=false AND ${checkDuplicatesOn} in ( select ${checkDuplicatesOn} from records group by ${checkDuplicatesOn} having count(${checkDuplicatesOn})>1)`;
 
 
-		function removeDuplicatesPromiseGenerator(updateoptions){
+		function removeDuplicatesPromiseGenerator(updateoptions) {
 
-			return records.update({is_deleted:true},{
-				where : {
-					id : updateoptions.id
+			return records.update({
+				is_deleted: true
+			}, {
+				where: {
+					id: updateoptions.id
 				}
 			})
 
 		}
-		
+
 		dbInstance.sequelize.query(query)
-			.then(function(duplicates){
+			.then(function(duplicates) {
 
 
 				var rows = duplicates[0];
@@ -59,16 +61,16 @@ module.exports = {
 
 				var duplis = [];
 
-				if(rows && rows.length){
+				if (rows && rows.length) {
 
 
-					rows.forEach(function(row){
+					rows.forEach(function(row) {
 
-						if(tracker.indexOf(row[checkDuplicatesOn]) === -1){
-							
-							
+						if (tracker.indexOf(row[checkDuplicatesOn]) === -1) {
+
+
 							tracker.push(row[checkDuplicatesOn]);
-						}else{
+						} else {
 							var dupli = row;
 							duplis.push(dupli);
 						}
@@ -77,7 +79,7 @@ module.exports = {
 
 					var promises = [];
 
-					duplis.forEach(function(dupli){
+					duplis.forEach(function(dupli) {
 
 						promises.push(removeDuplicatesPromiseGenerator(dupli));
 
@@ -85,48 +87,82 @@ module.exports = {
 
 
 					Promise.all(promises)
-						.then(function(resolvedrecords){
+						.then(function(resolvedrecords) {
 							next();
 						})
-						.catch(function(err){
+						.catch(function(err) {
 							return res.json({
-								success : 0,
-								message :err
+								success: 0,
+								message: err
 							})
 						})
 
 
-				}else{
+				} else {
 					next();
 				}
 
-				
+
 
 			})
-			.catch(function(err){
+			.catch(function(err) {
 				return res.json({
-					success : 0,
-					message :err
+					success: 0,
+					message: err
 				})
 			})
-		
+
 
 	},
 
-	info : function(req,res,next){
+	info: function(req, res, next) {
 
 		var query = "select count(*) as all,count(distinct(ona_record_id)) as distinct from records";
 		dbInstance.sequelize.query(query)
-			.then(function(reply){
+			.then(function(reply) {
 				return res.json({
-					success : 1,
-					info : reply[0][0]
+					success: 1,
+					info: reply[0][0]
 				})
 			})
-			.catch(function(err){
+			.catch(function(err) {
 				return res.json({
-					success : 0,
-					message :err
+					success: 0,
+					message: err
+				})
+			})
+
+
+	},
+
+
+	missing: function(req, res, next) {
+
+		var query = "select cast(ona_record_id as int) as ie from records order by ie asc";
+		dbInstance.sequelize.query(query)
+			.then(function(reply) {
+				var values = reply[0];
+				var missing = [];
+
+				values.forEach(function(value, index) {
+					if (values[index + 1]) {
+						var num1 = Number(values[index + 1].ie);
+						var num2 = Number(values[index].ie);
+						if (Math.abs(num2 - num1) !== 1) {
+							missing.push(value);
+						}
+					}
+				})
+
+				return res.json({
+					success: 1,
+					missing
+				})
+			})
+			.catch(function(err) {
+				return res.json({
+					success: 0,
+					message: err
 				})
 			})
 

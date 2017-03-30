@@ -120,12 +120,13 @@ module.exports = (router) => {
 
 	router.get('/api/v1/mis/assessment/queries',assessmentFn.collect,assessmentFn.queries);
 
-
 	router.get('/api/v1/mis/statistics/submission/daily',statisticsFn.dailySubmission);
 
 	router.get('/api/v1/mis/statistics/records/info',statisticsFn.info);
 
 	router.get('/api/v1/mis/data/cleanse',importFn.authorize,statisticsFn.test,recordsFn.creteStatCountAfterOna);
+
+	router.get('/api/v1/mis/missing/records',importFn.authorize,statisticsFn.missing);
 
 
 }
