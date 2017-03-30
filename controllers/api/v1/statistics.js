@@ -34,9 +34,9 @@ module.exports = {
 
 	test : function(req,res,next){
 		
-		var checkDuplicatesOn = 'ona_record_id';
+		var checkDuplicatesOn = 'hh_key';
 
-		var query = `select id,${checkDuplicatesOn} from records where ${checkDuplicatesOn} in ( select ${checkDuplicatesOn} from records group by ${checkDuplicatesOn} having count(${checkDuplicatesOn})>1)`;
+		var query = `select id,${checkDuplicatesOn} from records where records.is_deleted=false AND ${checkDuplicatesOn} in ( select ${checkDuplicatesOn} from records group by ${checkDuplicatesOn} having count(${checkDuplicatesOn})>1)`;
 
 
 		function removeDuplicatesPromiseGenerator(updateoptions){
@@ -86,10 +86,7 @@ module.exports = {
 
 					Promise.all(promises)
 						.then(function(resolvedrecords){
-							return res.json({
-								success : 1,
-								message : 'Removed dulpicates !'
-							})
+							next();
 						})
 						.catch(function(err){
 							return res.json({
@@ -100,10 +97,7 @@ module.exports = {
 
 
 				}else{
-					return res.json({
-						success : 1,
-						message : 'No need to remove dulpicates !'
-					})
+					next();
 				}
 
 				

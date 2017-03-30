@@ -125,7 +125,7 @@ module.exports = (router) => {
 
 	router.get('/api/v1/mis/statistics/records/info',statisticsFn.info);
 
-	// router.get('/api/v1/mis/test',statisticsFn.test);
+	router.get('/api/v1/mis/data/cleanse',importFn.authorize,statisticsFn.test,recordsFn.creteStatCountAfterOna);
 
 
 }
