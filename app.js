@@ -9,6 +9,8 @@ var bodyParser = require('body-parser');
 
 var app = express();
 
+var authorize = require('./libs/authorize');
+
 // try {
 //   var cronJob = require('./cron');
 
@@ -22,6 +24,24 @@ var app = express();
 // catch(e){
 //   console.log(e);
 // }
+
+app.put('/management/cron/stop',authorize.auth,function(req,res){
+  cronJob.stop();
+  console.log('******** Cron status : ',cronJob.running)
+  return res.json({
+    status : cronJob.running
+  })
+})
+
+app.put('/management/cron/start',authorize.auth,function(req,res){
+  if(!cronJob.running){
+    cronJob.start(); //start cron job
+    console.log('******** Cron status : ',cronJob.running)
+  }
+  return res.json({
+    status : cronJob.running
+  })
+})
 
 
 
