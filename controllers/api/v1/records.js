@@ -81,7 +81,6 @@ module.exports = {
 		var dbQuery = "\
 			SELECT \
 			count(records.*) as surveys, \
-			count(DISTINCT(records.submitted_by))  as surveyors , \
 			count(CASE WHEN house_statuses.status = '1' THEN 1 END) as construction_completed ,\
 			count(CASE WHEN house_statuses.status = '2' THEN 1 END) as construction_in_progress, \
 			count(CASE WHEN house_statuses.status = '3' THEN 1 END) as construction_not_started,  \
@@ -300,7 +299,7 @@ module.exports = {
 				"stats": {
 					"survey_status": {
 						"surveys": apiResponse.stats.surveys,
-						"surveyors": apiResponse.stats.surveyors,
+						// "surveyors": apiResponse.stats.surveyors,
 						"beneficiaries": req.beneficiariesCount
 					},
 					"construction_status": {
@@ -350,12 +349,18 @@ module.exports = {
 
 			// return res.json(finalApiResponse);
 
-			return next();
+			return dbInstance.sequelize.query("select count(*) from (select  submitted_by  from records group by submitted_by) as surveyors");
 
 
 
 		})
 
+		.then(function(surveryoscount){
+
+				req.finalApiResponse.stats.survey_status.surveyors = surveryoscount[0][0].count;
+				return next();
+
+		})
 
 
 		.catch(function(err) {

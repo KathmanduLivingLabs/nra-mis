@@ -78,12 +78,11 @@ module.exports = {
 	regularImport: function(req, res, next) {
 
 		// var query = 'select id, cast(submission_time as text) as strdate from records where submission_time in  (select max(submission_time) from records)';
-		var query = 'select count(*) from records';
+		var query = 'select max(cast(ona_record_id as int)) from records';
 
 		dbInstance.sequelize.query(query)
 			.then(function(currentRecords) {
-
-				var count = currentRecords[0][0].count;
+				var count = currentRecords[0][0].max;
 
 				// var count = currentRecords[0][0].strdate.split('+')[0];
 				// count = count.split(' ')[0] + 'T' + count.split(' ')[1];
@@ -91,7 +90,7 @@ module.exports = {
 				var onaUrl = config.ona.fetch.url;
 				var limitRecords = config.ona.limit;
 				// onaUrl = onaUrl + '?query={"_id":{"$gte":"' + count + '"}}&limit=' + limitRecords;
-				onaUrl = onaUrl + '?start=' + count + '&limit=' + limitRecords;
+				onaUrl = onaUrl + '?query={"_id":{"$gt":"' + count + '"}}&limit=' + limitRecords;
 
 
 
@@ -102,7 +101,7 @@ module.exports = {
 				}
 
 
-				console.log('requestOptions**********', requestOptions.method);
+				console.log('requestOptions**********', requestOptions);
 
 				request(requestOptions, function(err, response) {
 					if (err) {
@@ -112,12 +111,15 @@ module.exports = {
 							message: err
 						})
 					}
+
+					console.log('ALL THISNS',response)
 					req.onarecords = typeof response.body === 'object' ? response.body : JSON.parse(response.body);
 
 					if(req.onarecords && req.onarecords.length){
 						return next();
 						
 					}else{
+						console.log('Records up to date !')
 						return res.json({
 							success : 1,
 							message : 'Records are up-to-date !'
